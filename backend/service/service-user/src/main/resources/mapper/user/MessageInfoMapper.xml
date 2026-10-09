@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yitai.user.mapper.MessageInfoMapper">
+
+    <resultMap id="messageInfoMap" type="com.yitai.model.entity.user.MessageInfo" autoMapping="true">
+    </resultMap>
+
+    <sql id="columns">
+        id,user_id,title,content,message_type,is_read,business_id,dedup_key,message_level,create_time,update_time,is_deleted
+    </sql>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+        insert into message_info (
+            id,
+            user_id,
+            title,
+            content,
+            message_type,
+            is_read,
+            business_id,
+            dedup_key,
+            message_level
+        ) values (
+            #{id},
+            #{userId},
+            #{title},
+            #{content},
+            #{messageType},
+            #{isRead},
+            #{businessId},
+            #{dedupKey},
+            #{messageLevel}
+        )
+    </insert>
+
+    <!-- 检查是否存在未读的去重消息（在一定时间内） -->
+    <select id="countByDedupKeyAndTime" resultType="int">
+        select count(*)
+        from message_info
+        where dedup_key = #{dedupKey}
+        and user_id = #{userId}
+        and is_read = 0
+        and is_deleted = 0
+        and create_time >= DATE_SUB(NOW(), INTERVAL #{hours} HOUR)
+    </select>
+
+    <select id="selectByUserId" resultMap="messageInfoMap">
+        select <include refid="columns" />
+        from message_info
+        where user_id = #{userId}
+        and is_deleted = 0
+        order by create_time desc
+    </select>
+
+    <select id="countUnreadByUserId" resultType="int">
+        select count(*)
+        from message_info
+        where user_id = #{userId}
+        and is_read = 0
+        and is_deleted = 0
+    </select>
+
+    <update id="updateReadStatus">
+        update message_info
+        set is_read = 1,
+            update_time = now()
+        where id = #{messageId}
+        and user_id = #{userId}
+        and is_deleted = 0
+    </update>
+
+    <update id="updateAllRead">
+        update message_info
+        set is_read = 1,
+            update_time = now()
+        where user_id = #{userId}
+        and is_read = 0
+        and is_deleted = 0
+    </update>
+
+    <update id="deleteById">
+        update message_info
+        set is_deleted = 1,
+            update_time = now()
+        where id = #{messageId}
+        and user_id = #{userId}
+    </update>
+
+</mapper>

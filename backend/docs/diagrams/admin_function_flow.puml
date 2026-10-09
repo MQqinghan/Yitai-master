@@ -1,0 +1,266 @@
+@startuml 管理端功能流程图
+' 设置样式
+skinparam backgroundColor white
+skinparam defaultFontSize 14
+skinparam defaultFontName "Microsoft YaHei"
+skinparam activity {
+  BackgroundColor LightYellow
+  BorderColor SteelBlue
+  ArrowColor SteelBlue
+}
+skinparam note {
+  BackgroundColor LightBlue
+  BorderColor SteelBlue
+}
+skinparam partition {
+  BackgroundColor WhiteSmoke
+  BorderColor SteelBlue
+}
+
+title 后台管理系统功能流程图
+
+start
+
+partition "1. 用户登录认证" {
+  :管理员输入账号密码;
+  note right
+    前端: login.vue
+    接口: POST /admin/system/index/login
+  end note
+  
+  :前端发送登录请求;
+  
+  :后端验证账号是否存在;
+  
+  if (账号存在?) then (否)
+    :返回错误提示;
+    stop
+  else (是)
+    :验证密码是否正确;
+    
+    if (密码正确?) then (否)
+      :返回错误提示;
+      stop
+    else (是)
+      :生成Token (UUID);
+      note right
+        工具类: AuthContextUtil
+        存储: Redis (5分钟过期)
+      end note
+      
+      :将Token和用户信息存入Redis;
+      
+      :返回Token给前端;
+      
+      :前端存储Token到localStorage;
+      note right
+        Key: VEA-TOKEN
+        加密: AES加密存储
+      end note
+    endif
+  endif
+}
+
+partition "2. 权限检查与动态菜单加载" {
+  :前端携带Token请求用户信息;
+  note right
+    接口: GET /admin/system/index/getUserInfo
+    请求头: token: {token}
+  end note
+  
+  :后端从Redis获取用户信息;
+  
+  if (Token有效?) then (否)
+    :返回401未授权;
+    :前端跳转登录页;
+    stop
+  else (是)
+    :返回用户基本信息;
+  endif
+  
+  :前端请求用户可访问的菜单;
+  note right
+    接口: GET /admin/system/index/menus
+    核心SQL: findMenusByUserId
+  end note
+  
+  :后端查询用户权限菜单;
+  note right
+    SQL逻辑:
+    SELECT DISTINCT m.*
+    FROM sys_menu m
+    INNER JOIN sys_role_menu srm 
+      ON m.id = srm.menu_id
+    INNER JOIN sys_user_role sur 
+      ON srm.role_id = sur.role_id
+    WHERE sur.user_id = #{userId}
+  end note
+  
+  :构建菜单树形结构;
+  note right
+    工具类: MenuHelper.buildTree()
+    支持无限级嵌套
+  end note
+  
+  :返回菜单列表给前端;
+  
+  :前端动态生成路由;
+  note right
+    代码: menu.js generateMenus()
+    方法: router.addRoute(route)
+  end note
+  
+  :前端渲染侧边栏菜单;
+  note right
+    组件: Sidebar/Menus.vue
+    根据角色显示不同菜单
+  end note
+}
+
+partition "3. 功能操作 (按权限执行)" {
+  
+  fork
+    :系统管理操作;
+    note right
+      角色管理: sysRole.js
+      用户管理: sysUser.js
+      菜单管理: sysMenu.js
+    end note
+    
+    if (操作类型?) then (角色分配)
+      :选择角色并分配菜单;
+      note right
+        接口: POST /admin/system/sysRoleMenu/doAssign
+        DTO: AssginMenuDto
+      end note
+      
+      :删除角色原有菜单关联;
+      note right
+        SQL: DELETE FROM sys_role_menu
+      end note
+      
+      :批量插入新菜单关联;
+      note right
+        SQL: INSERT INTO sys_role_menu
+        包含: role_id, menu_id, is_half
+      end note
+      
+    else (用户管理)
+      :管理员CRUD操作;
+      note right
+        接口: /admin/system/sysUser/*
+        功能: 增删改查 + 分配角色
+      end note
+      
+      :给用户分配角色;
+      note right
+        接口: POST /admin/system/sysUser/doAssign
+        表: sys_user_role
+      end note
+      
+    else (菜单管理)
+      :菜单树形展示;
+      note right
+        接口: GET /admin/system/sysMenu/findNodes
+      end note
+      
+      if (操作类型?) then (新增菜单)
+        :保存菜单信息;
+        
+        :更新父菜单is_half状态;
+        note right
+          递归更新父级菜单
+          is_half = 1 (半开状态)
+        end note
+        
+      else (修改菜单)
+        :更新菜单信息;
+        
+      else (删除菜单)
+        :检查是否包含子菜单;
+        
+        if (有子菜单?) then (是)
+          :抛出异常NODE_ERROR;
+          note right
+            不允许删除有子级的菜单
+          end note
+          stop
+        else (否)
+          :删除菜单;
+        endif
+      endif
+    endif
+    
+  fork again
+    :商品管理操作;
+    note right
+      分类管理: category.vue
+      品牌管理: brand.vue
+      商品管理: product.vue
+      商品规格: productSpec.vue
+    end note
+    
+    :商品上下架操作;
+    note right
+      修改商品状态
+      status: 0下架 / 1上架
+    end note
+    
+    :修改商品/品牌信息;
+    note right
+      接口: /admin/system/product/*
+      支持图片上传到MinIO
+    end note
+    
+  fork again
+    :订单管理操作;
+    note right
+      订单统计: orderStatistics.vue
+      图表展示: ECharts
+    end note
+    
+    :查看订单统计数据;
+    note right
+      定时任务: OrderStatisticsTask
+      统计维度: 日期/金额/数量
+    end note
+  end fork
+}
+
+partition "4. 操作日志记录" {
+  :所有操作触发日志记录;
+  note right
+    注解: @Log
+    模块: common-log
+    技术: AOP切面
+  end note
+  
+  :AOP拦截器捕获操作;
+  note right
+    切面: LogAspect
+    注解: @EnableLogAspect
+  end note
+  
+  :记录日志信息;
+  note right
+    包含:
+    - 操作人 (userId)
+    - 操作模块 (title)
+    - 操作类型 (businessType)
+    - 请求参数
+    - 操作时间
+    - IP地址
+  end note
+  
+  :日志存入数据库;
+  note right
+    表: sys_oper_log
+    用途: 审计追踪 / 问题排查
+  end note
+}
+
+:操作完成;
+
+stop
+
+@enduml

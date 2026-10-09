@@ -1,0 +1,45 @@
+server:
+  port: 8501  # 后端端口正确，和前端代理匹配
+
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:3306/yitai_mall?characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: ${MYSQL_PASSWORD:root}
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: 6379
+      password: # 无密码则留空
+      database: 0
+      timeout: 5000
+      lettuce:
+        pool:
+          max-active: 128
+          max-wait: 10000
+          max-idle: 128
+          min-idle: 16
+
+mybatis:
+  mapper-locations: classpath:/mapper/*/*.xml
+  config-location: classpath:/mybatis-config.xml
+
+yitai:
+  auth:
+    noAuthUrls:
+      - /admin/system/index/login
+      - /admin/system/index/generateValidateCode
+      - #  Swagger 放行路径
+      - /doc.html
+      - /webjars/**
+      - /v3/api-docs/**
+      - /swagger-resources/**
+      - /favicon.ico
+
+  minio:
+    endpointUrl: http://${MINIO_HOST:127.0.0.1}:9000
+    accessKey: ${MINIO_ACCESS_KEY:minioadmin}
+    secreKey: ${MINIO_SECRET_KEY:minioadmin}  # 注意：这里是 secretKey 的笔误，若 MinIO 连接失败需改为 secretKey
+    bucketName: 1-bucket

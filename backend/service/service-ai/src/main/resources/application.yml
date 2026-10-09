@@ -1,0 +1,38 @@
+server:
+  port: 8600
+
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}   # local=本机密钥(application-local.yml，不入库)；clone 者无 local 文件自动用下方占位符
+  application:
+    name: service-ai
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_HOST:localhost}:8848
+      # 仅使用本地配置，不连 Nacos 配置中心，降低本地运行门槛
+      config:
+        enabled: false
+  # ===== Spring AI（OpenAI 兼容协议）=====
+  # 默认 DashScope 通义千问（与 RAG_文旅 / auto-jianli 同款）；换 DeepSeek / 智谱改 base-url + model 即可
+  ai:
+    openai:
+      api-key: ${AI_API_KEY:placeholder}
+      base-url: ${AI_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode}
+      chat:
+        options:
+          model: ${AI_MODEL:qwen-flash}
+          temperature: 0.7
+
+# ===== 以太 AI 自定义配置 =====
+ai:
+  # mock：不调用真实大模型，用规则 + 真实商品数据演示（保证 clone 即跑）
+  # openai：调用上面配置的 LLM（客服 RAG + 导购 Agent 工具循环）
+  provider: ${AI_PROVIDER:mock}
+  chat:
+    max-tool-steps: 5        # 导购 Agent 单轮最多工具调用次数
+    stream-chunk-size: 2     # SSE 流式输出每次切片字符数（中文友好）
+
+logging:
+  level:
+    com.yitai.ai: info

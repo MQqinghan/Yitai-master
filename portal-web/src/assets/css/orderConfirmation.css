@@ -1,0 +1,334 @@
+/* 页面容器 */
+.order-confirmation-page {
+    min-height: 100vh;
+    background: #f5f5f5;
+    padding-bottom: 80px; /* 为底部支付栏留空间 */
+}
+
+/* 顶部导航栏 */
+.order-header {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #eee;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.back-icon {
+    font-size: 24px;
+    color: #333;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.back-icon:hover {
+    color: #409eff;
+}
+
+.page-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    flex: 1;
+}
+
+/* 收货地址 */
+.address-selector {
+    background: #fff;
+    padding: 16px;
+    margin: 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 12px 0;
+}
+
+.address-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.address-display:hover {
+    background: #e8f4ff;
+}
+
+.addr-text {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+    flex: 1;
+}
+
+.arrow-icon {
+    font-size: 16px;
+    color: #999;
+    margin-left: 8px;
+}
+
+/* 商品信息 */
+.goods-info-modal {
+    background: #fff;
+    padding: 16px;
+    margin: 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.goods-item {
+    display: flex;
+    gap: 12px;
+    padding: 16px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.goods-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.goods-item:first-child {
+    padding-top: 0;
+}
+
+.goods-img-modal {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+    background: #f5f5f5;
+}
+
+.goods-desc-modal {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.goods-top-row {
+    display: flex;
+    align-items: flex-start;
+}
+
+.goods-name-modal {
+    font-size: 15px;
+    color: #333;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+}
+
+.goods-spec-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.spec-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #666;
+    line-height: 1.4;
+}
+
+.goods-bottom-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed #e8e8e8;
+}
+
+.goods-price-info,
+.goods-count-selector,
+.goods-subtotal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.count-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.count-controls .el-button {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 4px;
+}
+
+.count-controls .count-value {
+    min-width: 30px;
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+    font-weight: 600;
+}
+
+.price-label,
+.count-label,
+.subtotal-label {
+    font-size: 11px;
+    color: #999;
+}
+
+.price-value {
+    font-size: 14px;
+    color: #f56c6c;
+    font-weight: 600;
+}
+
+.count-value {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+.subtotal-label {
+    font-size: 11px;
+    color: #999;
+}
+
+.subtotal-value {
+    font-size: 16px;
+    color: #f56c6c;
+    font-weight: 700;
+}
+
+/* 底部支付栏 */
+.order-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+    z-index: 100;
+}
+
+.total-price {
+    font-size: 16px;
+    color: #333;
+}
+
+.total-price span {
+    color: #f56c6c;
+    font-weight: 700;
+    font-size: 20px;
+    margin-left: 4px;
+}
+
+.pay-btn {
+    min-width: 140px;
+    height: 44px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* PC端优化 */
+@media (min-width: 768px) {
+    .order-confirmation-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        padding-bottom: 100px;
+    }
+
+    .order-header {
+        position: relative;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+    }
+
+    .page-title {
+        font-size: 24px;
+    }
+
+    .address-selector,
+    .goods-info-modal {
+        margin: 0 0 20px 0;
+        padding: 24px;
+    }
+
+    .goods-img-modal {
+        width: 120px;
+        height: 120px;
+    }
+
+    .goods-name-modal {
+        font-size: 16px;
+    }
+
+    .price-value {
+        font-size: 15px;
+    }
+
+    .count-value {
+        font-size: 15px;
+    }
+
+    .subtotal-value {
+        font-size: 18px;
+    }
+
+    .spec-tag {
+        padding: 3px 10px;
+        font-size: 13px;
+    }
+
+    .order-footer {
+        position: relative;
+        margin-top: 20px;
+        padding: 24px;
+        border-radius: 8px;
+    }
+
+    .pay-btn {
+        min-width: 180px;
+        height: 48px;
+        font-size: 18px;
+    }
+}

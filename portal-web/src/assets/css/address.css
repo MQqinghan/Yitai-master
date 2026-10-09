@@ -1,0 +1,273 @@
+/* 全局页面样式 */
+.address-page {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+    padding-bottom: 60px; /* 给底部按钮留空间 */
+}
+
+/* 顶部导航栏 */
+.address-header {
+    height: 50px;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    border-bottom: 1px solid #eee;
+    position: relative;
+}
+
+.back-icon {
+    font-size: 20px;
+    color: #333;
+    cursor: pointer;
+    margin-right: 15px;
+}
+
+.page-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 auto;
+}
+
+/* 地址列表容器 */
+.address-container {
+    padding: 10px;
+}
+
+/* 地址项 */
+.address-item {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 1px solid #eee;
+    transition: all 0.3s;
+}
+
+.address-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.default-item {
+    border-color: #ff4d4f;
+    background-color: #fff9f9;
+}
+
+.address-info {
+    margin-bottom: 12px;
+}
+
+.addr-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.phone {
+    font-size: 14px;
+    color: #666;
+}
+
+.default-tag {
+    background-color: #ff4d4f;
+    color: #fff;
+    border: none;
+}
+
+/* 选择模式标签 */
+.use-tag {
+    background-color: #67c23a;
+    color: #fff;
+    border: none;
+}
+
+/* 选择模式：地址项可点击 */
+.address-item.selectable .address-info {
+    cursor: pointer;
+    position: relative;
+}
+
+.address-item.selectable .address-info:active {
+    background-color: #f0f9ff;
+}
+
+/* 选择模式：地址选择按钮区域 */
+.address-select {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-left: 15px;
+    border-left: 1px solid #eee;
+}
+
+.check-icon {
+    font-size: 20px;
+    color: #ff4d4f;
+}
+
+.use-btn {
+    border: 1px solid #409eff;
+    color: #409eff;
+    background-color: #fff;
+    padding: 5px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.use-btn:hover {
+    background-color: #409eff;
+    color: #fff;
+}
+
+.del-icon {
+    font-size: 18px;
+    color: #999;
+    cursor: pointer;
+    margin-left: auto;
+}
+
+.del-icon:hover {
+    color: #f56c6c;
+}
+
+.addr-detail {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* 地址操作栏 */
+.address-actions {
+    padding-top: 12px;
+    border-top: 1px dashed #eee;
+}
+
+.action-btns {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.action-btn {
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s;
+}
+
+.action-btn:hover {
+    color: #409eff;
+}
+
+.action-btn.set-default {
+    color: #ff4d4f;
+}
+
+.divider {
+    color: #ddd;
+}
+
+/* 空状态 */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 0;
+}
+
+.empty-icon {
+    font-size: 60px;
+    color: #ccc;
+    margin-bottom: 15px;
+}
+
+.empty-text {
+    font-size: 14px;
+    color: #999;
+}
+
+/* 添加地址按钮（底部固定） */
+.add-address-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background-color: #ff4d4f;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    z-index: 100;
+}
+
+.add-address-bar:hover {
+    background-color: #ff7875;
+}
+
+.add-icon {
+    font-size: 18px;
+}
+
+/* PC端适配 */
+@media (min-width: 768px) {
+    .address-page {
+        max-width: 800px;
+        margin: 0 auto;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        padding-bottom: 20px;
+    }
+
+    .address-header {
+        padding: 0 20px;
+    }
+
+    .back-icon {
+        display: none; /* PC端隐藏返回按钮 */
+    }
+
+    .address-container {
+        padding: 20px;
+    }
+
+    /* PC端按钮改为文档流，跟随在地址列表下方 */
+    .add-address-bar {
+        position: relative;
+        margin-top: 20px;
+        border-radius: 8px;
+        width: 100%;
+    }
+
+    .address-item {
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .address-info {
+        flex: 1;
+        margin-bottom: 0;
+    }
+
+    .address-actions {
+        padding-top: 0;
+        border-top: none;
+        margin-left: 20px;
+    }
+}

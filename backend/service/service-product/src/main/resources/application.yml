@@ -1,0 +1,46 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: service-product
+  config:
+    import: optional:nacos:${NACOS_HOST:localhost}:8848
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_HOST:localhost}:8848
+      config:
+        server-addr: ${NACOS_HOST:localhost}:8848
+        file-extension: yaml
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/yitai_mall?characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&connectTimeout=5000&socketTimeout=10000
+    username: root
+    password: ${MYSQL_PASSWORD:root}
+    hikari:
+      maximum-pool-size: 50        # 最大连接数
+      minimum-idle: 10             # 最小空闲连接
+      connection-timeout: 30000    # 连接超时时间(ms)
+      idle-timeout: 600000         # 空闲超时时间(ms)
+      max-lifetime: 1800000        # 连接最大生命周期(ms)
+      pool-name: ProductHikariCP
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+      lettuce:
+        pool:
+          max-active: 100
+          max-idle: 50
+          min-idle: 10
+          max-wait: 3000
+
+mybatis:
+  config-location: classpath:mybatis-config.xml
+  mapper-locations: classpath:/mapper/*/*.xml
+
+# Elasticsearch 连接（容器化时由 ELASTICSEARCH_HOST / ELASTICSEARCH_PORT 注入，默认 localhost:9200 不影响本地）
+elasticsearch:
+  host: ${ELASTICSEARCH_HOST:localhost}
+  port: ${ELASTICSEARCH_PORT:9200}

@@ -1,0 +1,486 @@
+@startuml 用户购买商品支付功能流程图
+' 设置样式
+skinparam backgroundColor white
+skinparam defaultFontSize 14
+skinparam defaultFontName "Microsoft YaHei"
+skinparam activity {
+  BackgroundColor LightYellow
+  BorderColor SteelBlue
+  ArrowColor SteelBlue
+}
+skinparam note {
+  BackgroundColor LightBlue
+  BorderColor SteelBlue
+}
+skinparam partition {
+  BackgroundColor WhiteSmoke
+  BorderColor SteelBlue
+}
+skinparam diamond {
+  BackgroundColor LightCoral
+  BorderColor DarkRed
+}
+
+title 用户购买商品支付功能流程图
+
+start
+
+partition "1. 商品选择与购物车" {
+  :用户浏览商品列表;
+  note right
+    前端: home.vue / searchResult.vue
+    接口: GET /api/product/index
+  end note
+  
+  :查看商品详情;
+  note right
+    前端: GoodsDetail.vue / detail.vue
+    接口: GET /api/product/item/{skuId}
+  end note
+  
+  :点击"加入购物车";
+  
+  if (用户已登录?) then (否)
+    :跳转登录页面;
+    note right
+      前端: login.vue
+      路由: /login
+    end note
+    
+    :用户输入账号密码;
+    
+    :前端调用登录接口;
+    note right
+      接口: POST /user/userInfo/login
+      参数: username, password
+    end note
+    
+    :后端验证账号密码;
+    
+    if (验证成功?) then (否)
+      :返回错误提示;
+      stop
+    else (是)
+      :生成Token并存入Redis;
+      note right
+        Token存储在localStorage
+        请求头: token: {token}
+      end note
+      
+      :返回用户信息;
+    endif
+    
+  else (是)
+  endif
+  
+  :前端调用加入购物车接口;
+  note right
+    接口: GET /order/cart/auth/addToCart/{skuId}/{skuNum}
+    服务: service-cart
+  end note
+  
+  :后端将商品信息存入Redis;
+  note right
+    Redis Key: cart:{userId}
+    数据结构: Hash
+    Field: skuId, Value: CartInfo JSON
+  end note
+  
+  :返回添加成功;
+  
+  :显示购物车图标数量+1;
+}
+
+partition "2. 购物车结算" {
+  :用户进入购物车页面;
+  note right
+    前端: Cart.vue
+    路由: /cart
+  end note
+  
+  :前端请求购物车列表;
+  note right
+    接口: GET /order/cart/auth/cartList
+  end note
+  
+  :后端从Redis获取购物车数据;
+  
+  :并行调用商品服务获取最新信息;
+  note right
+    Feign调用: ProductFeignClient.getBySkuId()
+    获取: 最新价格、库存、商品名称
+  end note
+  
+  :返回购物车列表(含最新价格);
+  
+  :用户勾选要购买的商品;
+  note right
+    功能: 单个选中/取消
+    接口: GET /order/cart/auth/checkCart/{skuId}/{isChecked}
+  end note
+  
+  :实时计算选中商品总价;
+  
+  if (库存充足?) then (否)
+    :提示库存不足;
+    note right
+      红色提示: "商品库存不足"
+      禁用结算按钮
+    end note
+    stop
+  else (是)
+  endif
+  
+  :用户点击"去结算";
+}
+
+partition "3. 确认订单" {
+  :前端请求结算页数据;
+  note right
+    接口: GET /order/orderInfo/auth/trade
+    服务: service-order
+  end note
+  
+  fork
+    :获取用户地址列表;
+    note right
+      Feign调用: UserFeignClient
+      接口: /api/user/userAddress/auth/findUserAddressList
+    end note
+  fork again
+    :获取选中购物车商品;
+    note right
+      Feign调用: CartFeignClient.getAllCkecked()
+      包含: skuId, skuNum, price
+    end note
+  fork again
+    :获取商品详细信息;
+    note right
+      Feign调用: ProductFeignClient.getBySkuId()
+      验证库存和价格
+    end note
+  end fork
+  
+  :计算订单总金额;
+  note right
+    总金额 = Σ(商品价格 × 数量)
+    不含运费
+  end note
+  
+  :返回结算数据给前端;
+  note right
+    包含:
+    - 用户地址列表
+    - 选中商品清单
+    - 商品明细(名称、图片、价格、数量)
+    - 订单总金额
+  end note
+  
+  :前端展示确认订单页面;
+  note right
+    前端: orderConfirmation.vue
+    路由: /order/confirm
+  end note
+  
+  :用户选择收货地址;
+  
+  :确认订单信息;
+  
+  :点击"提交订单";
+}
+
+partition "4. 订单创建" {
+  :前端调用提交订单接口;
+  note right
+    接口: POST /order/orderInfo/auth/submitOrder
+    参数: tradeVo (地址ID、商品列表、总金额)
+  end note
+  
+  :后端开启数据库事务;
+  note right
+    @Transactional
+    保证数据一致性
+  end note
+  
+  :生成订单号;
+  note right
+    规则: 时间戳 + 随机数
+    示例: 1712995200000
+  end note
+  
+  :创建订单主表记录;
+  note right
+    表: order_info
+    字段: order_no, user_id, total_amount
+    状态: 0-未支付
+  end note
+  
+  :创建订单项记录;
+  note right
+    表: order_item
+    循环插入: sku_id, sku_name, price, sku_num
+  end note
+  
+  :删除已选中的购物车商品;
+  note right
+    Feign调用: CartFeignClient.deleteChecked()
+    Redis删除: cart:{userId} 中选中的skuId
+  end note
+  
+  :提交事务;
+  
+  :返回订单号给前端;
+  
+  :前端跳转支付页面;
+  note right
+    路由: /pay?orderNo={orderNo}
+    组件: pay.vue
+  end note
+}
+
+partition "5. 支付处理" {
+  :前端请求支付宝支付;
+  note right
+    接口: GET /order/alipay/submitAlipay/{orderNo}
+    服务: service-pay
+  end note
+  
+  :后端查询订单信息;
+  note right
+    Feign调用: OrderFeignClient.getOrderInfoByOrderNo()
+    验证: 订单存在、状态未支付
+  end note
+  
+  if (订单有效?) then (否)
+    :返回错误提示;
+    stop
+  else (是)
+  endif
+  
+  :构建支付宝请求参数;
+  note right
+    包含:
+    - out_trade_no (订单号)
+    - total_amount (支付金额)
+    - subject (商品标题)
+    - return_url (同步回调地址)
+    - notify_url (异步回调地址)
+  end note
+  
+  :调用支付宝SDK生成支付表单;
+  note right
+    SDK: alipay-sdk-java 4.8.73
+    网关: https://openapi-sandbox.dl.alipaydev.com
+    模式: 沙箱环境
+  end note
+  
+  :对请求参数进行RSA签名;
+  note right
+    加密算法: RSA2
+    密钥: app_private_key
+    保证: 数据完整性和防篡改
+  end note
+  
+  :返回支付宝HTML表单给前端;
+  
+  :前端自动提交表单跳转支付宝;
+  note right
+    技术: document.form.submit()
+    用户看到支付宝收银台
+  end note
+  
+  :用户在支付宝页面完成支付;
+  note right
+    支付方式: 支付宝余额/银行卡/花呗
+    输入: 支付密码/指纹
+  end note
+}
+
+partition "6. 支付回调处理" {
+  
+  fork
+    :同步回调 (用户跳转);
+    note right
+      地址: http://localhost:8088/pay/success
+      作用: 展示支付结果页面
+      不依赖此更新订单状态
+    end note
+    
+    :前端跳转支付成功页;
+    note right
+      前端: paySuccess.vue
+      显示: 订单号、支付金额、支付时间
+    end note
+    
+  fork again
+    :异步回调 (支付宝通知);
+    note right
+      地址: http://yitaigouwu.free.idcfengye.com/api/order/alipay/callback/notify
+      技术: 内网穿透 (idcfengye)
+      作用: 可靠更新订单状态
+    end note
+    
+    :支付宝POST通知到后端;
+    note right
+      包含:
+      - out_trade_no (订单号)
+      - trade_status (交易状态)
+      - total_amount (支付金额)
+      - 签名数据
+    end note
+    
+    :验签 (验证支付宝签名);
+    note right
+      使用: alipay_public_key
+      防止: 伪造回调请求
+    end note
+    
+    if (验签成功?) then (否)
+      :记录错误日志;
+      :返回fail给支付宝;
+      stop
+    else (是)
+    endif
+    
+    :检查订单是否已处理;
+    note right
+      防止: 重复回调导致重复处理
+      幂等性保证
+    end note
+    
+    if (trade_status == TRADE_SUCCESS?) then (否)
+      :记录支付失败日志;
+      :返回fail;
+      stop
+    else (是)
+    endif
+    
+    :更新订单状态为已支付;
+    note right
+      Feign调用: OrderFeignClient.updateOrderStatus()
+      状态: 0未支付 → 1已支付
+    end note
+    
+    :更新商品销量;
+    note right
+      Feign调用: ProductFeignClient.updateSaleNum()
+      参数: skuId, num (增加销量)
+    end note
+    
+    :发送支付成功消息;
+    note right
+      Feign调用: UserFeignClient.saveMessageWithDedup()
+      消息类型: 订单支付成功通知
+      去重: 防止重复发送
+    end note
+    
+    :返回success给支付宝;
+    note right
+      告诉支付宝: 已收到通知
+      支付宝停止重试
+    end note
+  end fork
+}
+
+partition "7. 支付结果展示" {
+  :前端请求订单详情;
+  note right
+    接口: GET /order/orderInfo/auth/{orderId}
+    查询: 订单状态、金额、时间
+  end note
+  
+  if (订单已支付?) then (否)
+    :显示"支付处理中";
+    :轮询查询支付状态;
+    note right
+      接口: GET /order/orderInfo/auth/getPayStatus/{orderNo}
+      间隔: 每3秒查询一次
+    end note
+  else (是)
+  endif
+  
+  :展示支付成功页面;
+  note right
+    显示内容:
+    ✓ 支付成功图标
+    ✓ 订单号
+    ✓ 支付金额
+    ✓ 支付时间
+    ✓ 查看订单详情按钮
+  end note
+  
+  :用户可点击"查看订单详情";
+  note right
+    路由: /order/detail?orderId={orderId}
+    组件: orderDetail.vue
+  end note
+  
+  :展示订单完整信息;
+  note right
+    包含:
+    - 订单编号
+    - 商品清单 (图片、名称、规格、数量、价格)
+    - 收货地址
+    - 支付信息 (金额、时间、方式)
+    - 订单状态
+  end note
+}
+
+partition "8. 异常处理" {
+  
+  fork
+    :支付失败场景;
+    note right
+      原因: 余额不足/密码错误/银行卡问题
+    end note
+    
+    :支付宝返回失败状态;
+    
+    :前端显示支付失败提示;
+    note right
+      提示: "支付失败,请重试"
+      按钮: 重新支付 / 取消订单
+    end note
+    
+    if (用户选择?) then (重新支付)
+      :重新跳转支付页面;
+    else (取消订单)
+      :调用取消订单接口;
+      note right
+        状态: 0未支付 → 4已取消
+        恢复库存 (如果有预扣)
+      end note
+    endif
+    
+  fork again
+    :超时未支付场景;
+    note right
+      超时时间: 通常30分钟
+      定时任务: 扫描超时订单
+    end note
+    
+    :定时任务扫描超时订单;
+    note right
+      条件: 创建时间 > 30分钟 AND 状态 = 未支付
+    end note
+    
+    :自动取消订单;
+    note right
+      状态变更: 0 → 4
+      恢复库存
+    end note
+    
+    :发送订单取消通知;
+    note right
+      消息类型: 订单超时取消通知
+      渠道: 站内消息
+    end note
+  end fork
+}
+
+:流程结束;
+
+stop
+
+@enduml
+

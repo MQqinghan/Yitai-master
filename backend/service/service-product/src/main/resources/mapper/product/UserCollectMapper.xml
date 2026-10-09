@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yitai.product.mapper.UserCollectMapper">
+
+    <resultMap id="userCollectMap" type="com.yitai.model.entity.product.UserCollect" autoMapping="true">
+    </resultMap>
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+        id,user_id,sku_id,create_time,update_time,is_deleted
+    </sql>
+
+    <!-- 收藏商品 -->
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+        insert into user_collect (
+            id,
+            user_id,
+            sku_id
+        ) values (
+            #{id},
+            #{userId},
+            #{skuId}
+        )
+    </insert>
+
+    <!-- 取消收藏 -->
+    <delete id="deleteByUserIdAndSkuId">
+        update user_collect
+        set is_deleted = 1
+        where user_id = #{userId}
+          and sku_id = #{skuId}
+          and is_deleted = 0
+    </delete>
+
+    <!-- 获取用户收藏列表 -->
+    <select id="getListByUserId" resultMap="userCollectMap">
+        select <include refid="columns"/>
+        from user_collect
+        where user_id = #{userId}
+          and is_deleted = 0
+        order by create_time desc
+    </select>
+
+    <!-- 判断是否已收藏 -->
+    <select id="getByUserIdAndSkuId" resultMap="userCollectMap">
+        select <include refid="columns"/>
+        from user_collect
+        where user_id = #{userId}
+          and sku_id = #{skuId}
+          and is_deleted = 0
+        limit 1
+    </select>
+    
+    <!-- 获取用户收藏的SKU ID列表 -->
+    <select id="selectSkuIdsByUserId" resultType="java.lang.Long">
+        select sku_id
+        from user_collect
+        where user_id = #{userId}
+          and is_deleted = 0
+    </select>
+    
+    <!-- 获取用户最近一次收藏的商品SKU ID -->
+    <select id="selectLatestCollectSkuId" resultType="java.lang.Long">
+        select sku_id
+        from user_collect
+        where user_id = #{userId}
+          and is_deleted = 0
+        order by create_time desc
+        limit 1
+    </select>
+
+</mapper>

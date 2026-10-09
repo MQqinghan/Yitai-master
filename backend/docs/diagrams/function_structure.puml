@@ -1,0 +1,242 @@
+@startuml 系统功能结构图
+' 设置样式
+skinparam backgroundColor white
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam rectangle {
+  BackgroundColor WhiteSmoke
+  BorderColor SteelBlue
+}
+skinparam node {
+  BackgroundColor LightBlue
+  BorderColor DarkBlue
+}
+
+title 电商系统功能结构图
+
+' ==================== 前台用户端 ====================
+package "前台用户端 (Vue 3 + TypeScript)" as FrontClient {
+  rectangle "首页模块" as HomeModule
+  rectangle "商品浏览模块" as ProductModule
+  rectangle "智能搜索模块" as SearchModule
+  rectangle "购物车模块" as CartModule
+  rectangle "订单管理模块" as OrderModule
+  rectangle "支付模块" as PayModule
+  rectangle "用户中心模块" as UserModule
+  rectangle "收藏模块" as CollectModule
+  rectangle "消息模块" as MessageModule
+  rectangle "地址管理模块" as AddressModule
+  rectangle "登录注册模块" as AuthModule
+  
+  note right of HomeModule
+    核心功能:
+    - 畅销商品展示
+    - 猜你喜欢推荐
+    - 商品分类导航
+  end note
+  
+  note right of SearchModule
+    核心功能:
+    - ES全文检索
+    - 分类/品牌筛选
+    - 搜索历史记录
+    - 关键词高亮
+  end note
+  
+  note right of CartModule
+    核心功能:
+    - 添加/删除商品
+    - 选中/取消联动
+    - 实时价格计算
+    - 一键清空
+  end note
+  
+  note right of OrderModule
+    核心功能:
+    - 购物车结算
+    - 立即购买
+    - 订单列表查询
+    - 订单详情查看
+  end note
+  
+  note right of PayModule
+    核心功能:
+    - 支付宝沙箱支付
+    - 支付状态查询
+    - 支付成功回调
+  end note
+}
+
+' ==================== 后台管理端 ====================
+package "后台管理端 (Vue 3 + Element Plus)" as AdminClient {
+  rectangle "首页仪表盘" as DashboardModule
+  rectangle "系统管理" as SystemModule {
+    rectangle "角色管理" as RoleModule
+    rectangle "用户管理" as UserManagerModule
+    rectangle "菜单管理" as MenuModule
+  }
+  
+  rectangle "商品管理" as ProductAdminModule {
+    rectangle "分类管理" as CategoryModule
+    rectangle "品牌管理" as BrandModule
+    rectangle "分类品牌" as CategoryBrandModule
+    rectangle "商品规格" as SpecModule
+    rectangle "商品管理" as ProductManageModule
+  }
+  
+  rectangle "订单管理" as OrderAdminModule {
+    rectangle "订单统计" as OrderStatsModule
+  }
+  
+  note right of SystemModule
+    核心功能:
+    - RBAC权限模型
+    - 角色分配菜单
+    - 用户分配角色
+    - 动态权限菜单
+  end note
+  
+  note right of ProductAdminModule
+    核心功能:
+    - 商品CRUD
+    - 上下架管理
+    - SKU管理
+    - 文件上传(MinIO)
+  end note
+  
+  note right of OrderStatsModule
+    核心功能:
+    - 订单数据统计
+    - ECharts图表展示
+    - 数据分析报表
+  end note
+}
+
+' ==================== 后端服务层 ====================
+package "后端服务层" as BackendServices {
+  
+  ' 商品微服务
+  rectangle "商品微服务\n(service-product)" as ProductService {
+    rectangle "商品展示" as ProductDisplay
+    rectangle "ES智能搜索" as EsSearch
+    rectangle "推荐算法" as Recommend
+    rectangle "收藏功能" as Collect
+    rectangle "数据同步" as DataSync
+  }
+  
+  ' 订单微服务
+  rectangle "订单微服务\n(service-order)" as OrderService {
+    rectangle "购物车管理" as CartManage
+    rectangle "订单创建" as OrderCreate
+    rectangle "订单查询" as OrderQuery
+    rectangle "订单状态" as OrderStatus
+  }
+  
+  ' 用户微服务
+  rectangle "用户微服务\n(service-user)" as UserService {
+    rectangle "用户认证" as UserAuth
+    rectangle "地址管理" as AddressManage
+    rectangle "短信服务" as SmsService
+    rectangle "消息中心" as MessageCenter
+  }
+  
+  ' 支付微服务
+  rectangle "支付微服务\n(service-pay)" as PayService {
+    rectangle "支付宝支付" as Alipay
+    rectangle "支付记录" as PaymentRecord
+  }
+  
+  ' 购物车微服务
+  rectangle "购物车微服务\n(service-cart)" as CartService {
+    rectangle "购物车操作" as CartOperate
+    rectangle "智能决策" as SmartDecision
+  }
+  
+  ' 后台管理系统
+  rectangle "后台管理系统\n(manager - 单体)" as ManagerService {
+    rectangle "管理员认证" as AdminAuth
+    rectangle "角色管理" as AdminRole
+    rectangle "用户管理" as AdminUser
+    rectangle "菜单管理" as AdminMenu
+    rectangle "文件上传" as FileUpload
+  }
+}
+
+' ==================== 数据层 ====================
+package "数据层" as DataLayer {
+  database "MySQL" as MySQL
+  database "Redis" as Redis
+  database "Elasticsearch" as ES
+  database "MinIO" as MinIO
+}
+
+' ==================== 第三方服务 ====================
+cloud "第三方服务" as ExternalServices {
+  rectangle "支付宝沙箱" as AlipaySandbox
+  rectangle "阿里云短信" as SmsApi
+}
+
+' ==================== 功能关联关系 ====================
+
+' 前台用户端功能关联
+HomeModule --> ProductDisplay : 调用
+SearchModule --> EsSearch : 调用
+CartModule --> CartManage : 调用
+OrderModule --> OrderCreate : 调用
+OrderModule --> OrderQuery : 调用
+PayModule --> Alipay : 调用
+UserModule --> UserAuth : 调用
+CollectModule --> Collect : 调用
+MessageModule --> MessageCenter : 调用
+AddressModule --> AddressManage : 调用
+AuthModule --> UserAuth : 调用
+
+' 后台管理端功能关联
+DashboardModule --> OrderStatsModule : 数据展示
+RoleModule --> AdminRole : 调用
+UserManagerModule --> AdminUser : 调用
+MenuModule --> AdminMenu : 调用
+CategoryModule --> ProductDisplay : 调用
+BrandModule --> ProductDisplay : 调用
+ProductManageModule --> ProductDisplay : 调用
+OrderStatsModule --> OrderQuery : 调用
+
+' 后端服务之间的调用(Feign)
+OrderCreate ..> CartManage : Feign调用
+OrderCreate ..> ProductDisplay : Feign调用
+OrderCreate ..> AddressManage : Feign调用
+Alipay ..> OrderQuery : Feign调用
+Recommend ..> CartOperate : Feign调用
+Recommend ..> OrderQuery : Feign调用
+SmartDecision ..> ProductDisplay : Feign调用
+SmartDecision ..> UserAuth : Feign调用
+
+' 后端服务到数据层
+ProductService --> MySQL : MyBatis
+ProductService --> Redis : 缓存
+ProductService --> ES : 搜索
+OrderService --> MySQL : MyBatis
+OrderService --> Redis : 缓存
+UserService --> MySQL : MyBatis
+UserService --> Redis : 缓存
+PayService --> MySQL : MyBatis
+CartService --> Redis : 主存储
+ManagerService --> MySQL : MyBatis
+ManagerService --> MinIO : 文件上传
+
+' 后端服务到第三方服务
+Alipay --> AlipaySandbox : 支付请求
+SmsService --> SmsApi : 发送短信
+
+' ==================== 图例说明 ====================
+legend right
+  |= 符号 |= 含义 |
+  | --> | 功能调用/依赖 |
+  | ..> | Feign远程调用 |
+  | 矩形 | 功能模块 |
+  | 圆柱体 | 数据存储 |
+  | 云朵 | 外部服务 |
+endlegend
+
+@enduml

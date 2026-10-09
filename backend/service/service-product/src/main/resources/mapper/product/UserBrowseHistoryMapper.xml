@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yitai.product.mapper.UserBrowseHistoryMapper">
+
+    <!-- 添加或更新浏览记录 -->
+    <insert id="insertOrUpdate">
+        INSERT INTO user_browse_history (user_id, sku_id, browse_count, create_time, update_time, is_deleted)
+        VALUES (#{userId}, #{skuId}, 1, NOW(), NOW(), 0)
+        ON DUPLICATE KEY UPDATE
+            browse_count = browse_count + 1,
+            update_time = NOW()
+    </insert>
+
+    <!-- 查询用户最近浏览的SKU列表(按时间倒序) -->
+    <select id="selectRecentSkuIds" resultType="java.lang.Long">
+        SELECT sku_id
+        FROM user_browse_history
+        WHERE user_id = #{userId}
+          AND is_deleted = 0
+        ORDER BY update_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 统计用户浏览最多的类目 -->
+    <select id="selectTopCategories" resultType="java.util.Map">
+        SELECT
+            p.category3_id AS categoryId,
+            COUNT(*) AS browseCount
+        FROM user_browse_history ubh
+        INNER JOIN product_sku ps ON ubh.sku_id = ps.id
+        INNER JOIN product p ON ps.product_id = p.id
+        WHERE ubh.user_id = #{userId}
+          AND ubh.is_deleted = 0
+          AND p.status = 1
+        GROUP BY p.category3_id
+        ORDER BY browseCount DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 查询用户最近浏览的SKU ID列表（按时间倒序） -->
+    <select id="selectRecentSkuIdsWithTime" resultType="java.lang.Long">
+        SELECT sku_id
+        FROM user_browse_history
+        WHERE user_id = #{userId}
+          AND is_deleted = 0
+        ORDER BY update_time DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

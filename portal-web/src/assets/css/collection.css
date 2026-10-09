@@ -1,0 +1,268 @@
+/* 全局 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.collection-page {
+    width: 100%;
+    min-height: 100vh;
+    background: #f5f5f5;
+}
+
+/* ==================== 移动端 ==================== */
+.mobile-collection {
+    width: 100%;
+}
+
+/* 顶部导航 */
+.mobile-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 46px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    z-index: 99;
+    border-bottom: 1px solid #f0f0f0;
+}
+.back-icon {
+    font-size: 22px;
+    color: #333;
+}
+.header-title {
+    font-size: 17px;
+    font-weight: 500;
+    color: #333;
+}
+.header-actions {
+    display: flex;
+    gap: 18px;
+}
+.action-icon {
+    font-size: 20px;
+    color: #333;
+}
+
+/* 分类栏 */
+.category-bar {
+    margin-top: 46px;
+    height: 44px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    border-bottom: 1px solid #f0f0f0;
+}
+.category-list {
+    display: flex;
+    gap: 18px;
+}
+.category-item {
+    font-size: 15px;
+    color: #666;
+    padding: 4px 0;
+}
+.category-item.active {
+    color: #ff4d4f;
+    font-weight: 500;
+    border-bottom: 2px solid #ff4d4f;
+}
+.filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    color: #666;
+}
+
+/* 商品列表 */
+.goods-list {
+    padding: 10px;
+}
+.goods-item {
+    background: #fff;
+    border-radius: 10px;
+    display: flex;
+    padding: 12px;
+    margin-bottom: 10px;
+    gap: 12px;
+}
+.goods-img {
+    width: 110px;
+    height: 110px;
+    flex-shrink: 0;
+}
+.goods-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+.goods-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.goods-name {
+    font-size: 15px;
+    color: #333;
+    line-height: 1.4;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.goods-price {
+    font-size: 18px;
+    color: #ff4d4f;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+.shop-name {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 10px;
+}
+.goods-btns {
+    display: flex;
+    gap: 10px;
+}
+.mini-btn {
+    padding: 4px 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #666;
+}
+
+/* ==================== PC 端 ==================== */
+.pc-collection {
+    width: 100%;
+    padding: 30px 0;
+}
+.pc-container {
+    width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 20px;
+}
+
+/* 左侧菜单 */
+.pc-left-menu {
+    width: 200px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px 0;
+}
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    cursor: pointer;
+    font-size: 15px;
+    color: #333;
+}
+.menu-item:hover {
+    background: #f8f8f8;
+}
+.menu-item.active {
+    background: #fff1f0;
+    color: #ff4d4f;
+    font-weight: 500;
+}
+.menu-item .el-icon {
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+/* 右侧内容 */
+.pc-right-content {
+    flex: 1;
+}
+.panel {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+}
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.panel-header h2 {
+    font-size: 20px;
+    font-weight: 500;
+}
+.panel-actions {
+    display: flex;
+    gap: 15px;
+}
+
+/* PC商品列表 */
+.pc-goods-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+.pc-goods-item {
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    gap: 15px;
+}
+.pc-goods-img {
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+}
+.pc-goods-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+}
+.pc-goods-name {
+    font-size: 15px;
+    color: #333;
+    line-height: 1.4;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.pc-goods-price {
+    font-size: 18px;
+    color: #ff4d4f;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+.pc-shop-name {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 12px;
+}
+.pc-goods-btns {
+    display: flex;
+    gap: 10px;
+}
+
+/* 响应式 */
+@media (max-width: 1200px) {
+    .pc-container {
+        width: 95%;
+    }
+    .pc-goods-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

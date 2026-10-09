@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yitai.order.mapper.OrderItemMapper">
+
+    <!--//根据订单id查询订单项-->
+    <select id="findByOrderId" resultType="com.yitai.model.entity.order.OrderItem">
+        select *
+        from order_item
+        where order_id=#{orderId}
+        and is_deleted=0
+        order by id desc
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+        insert into order_item (
+            id,
+            order_id,
+            sku_id,
+            sku_name,
+            thumb_img,
+            sku_price,
+            sku_num
+        ) values (
+                     #{id},
+                     #{orderId},
+                     #{skuId},
+                     #{skuName},
+                     #{thumbImg},
+                     #{skuPrice},
+                     #{skuNum}
+                 )
+    </insert>
+    
+    <!--远程调用：获取用户已购买的SKU ID列表-->
+    <select id="selectPurchasedSkuIdsByUserId" resultType="java.lang.Long">
+        SELECT DISTINCT oi.sku_id
+        FROM order_item oi
+        INNER JOIN order_info o ON oi.order_id = o.id
+        WHERE o.user_id = #{userId}
+          AND o.order_status IN (1, 2, 3)  -- 已支付、已发货、已完成
+          AND oi.is_deleted = 0
+          AND o.is_deleted = 0
+    </select>
+    
+    <!--远程调用：获取用户购买历史类目统计-->
+    <select id="selectPurchaseCategoryStats" resultType="java.util.Map">
+        SELECT
+            p.category3_id AS categoryId,
+            COUNT(*) AS purchaseCount
+        FROM order_item oi
+        INNER JOIN order_info o ON oi.order_id = o.id
+        INNER JOIN product_sku ps ON oi.sku_id = ps.id
+        INNER JOIN product p ON ps.product_id = p.id
+        WHERE o.user_id = #{userId}
+          AND o.order_status IN (1, 2, 3)  -- 已支付、已发货、已完成
+          AND oi.is_deleted = 0
+          AND o.is_deleted = 0
+        GROUP BY p.category3_id
+        ORDER BY purchaseCount DESC
+    </select>
+</mapper>

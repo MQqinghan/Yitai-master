@@ -1,0 +1,110 @@
+server:
+  port: 8500
+  tomcat:
+    threads:
+      max: 500
+      min-spare: 50
+    accept-count: 1000
+    max-connections: 10000
+
+spring:
+  application:
+    name: server-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_HOST:localhost}:8848
+      config:
+        server-addr: ${NACOS_HOST:localhost}:8848
+        file-extension: yaml
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            # 允许请求中携带的头信息
+            allowedHeaders: "*"
+            # 运行跨域的请求方式
+            allowedMethods: "*"
+            # 跨域检测的有效期,单位s
+            maxAge: 36000
+      routes:
+        - id: service-product
+          uri: lb://service-product
+          predicates:
+            - Path=/api/product/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100  # 令牌桶每秒填充速率（正常速率）
+                redis-rate-limiter.burstCapacity: 200  # 令牌桶最大容量（峰值速率）
+                redis-rate-limiter.requestedTokens: 1  # 每次请求消耗的令牌数
+                key-resolver: "#{@pathKeyResolver}"    # 使用路径作为限流key
+        - id: service-user
+          uri: lb://service-user
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@pathKeyResolver}"
+        - id: service-cart
+          uri: lb://service-cart
+          predicates:
+            - Path=/api/order/cart/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@pathKeyResolver}"
+        - id: service-order
+          uri: lb://service-order
+          predicates:
+            - Path=/api/order/orderInfo/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@pathKeyResolver}"
+        - id: service-pay
+          uri: lb://service-pay
+          predicates:
+            - Path=/api/order/alipay/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@pathKeyResolver}"
+        - id: service-ai
+          uri: lb://service-ai
+          predicates:
+            - Path=/api/ai/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 50
+                redis-rate-limiter.burstCapacity: 100
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@pathKeyResolver}"
+  data:
+    redis:
+      port: 6379
+      host: ${REDIS_HOST:localhost}
+      lettuce:
+        pool:
+          max-active: 200
+          max-idle: 100
+          min-idle: 20
+          max-wait: 3000

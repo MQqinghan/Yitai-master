@@ -1,0 +1,279 @@
+# ============================================================
+# Yitai 商城一键环境（2026-09-29 容器化版本）
+# 组成：
+#   中间件：MySQL8 + Redis7 + Nacos2.4.3 + ES7.17(IK) + MinIO
+#   后端服务（本文件新增）：gateway / product / user / order / cart / pay / ai / manager
+#
+# 用法：
+#   1) 先打好所有 jar：   cd backend && mvn -B clean package -DskipTests
+#   2) 起全部：           docker compose up -d --build
+#   3) 看日志：           docker compose logs -f <服务名>
+#   4) 只起中间件（先调前端时用）：docker compose up -d mysql redis nacos elasticsearch minio
+#
+# 网络：所有容器在同一个 compose 网络里，容器间用「服务名」互访
+#       （mysql / redis / nacos / elasticsearch / minio / 各微服务名）。
+#       宿主机访问网关：http://localhost:8500
+# ============================================================
+name: yitai
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: yitai-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: yitai_mall
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/docs/sql/yitai_mall_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./backend/docs/sql/generate_test_data.sql:/docker-entrypoint-initdb.d/02_test_data.sql:ro
+      - ./backend/docs/sql/add_analysis_menu_complete.sql:/docker-entrypoint-initdb.d/03_analysis_menu.sql:ro
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --default-time-zone=+08:00
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: yitai-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  nacos:
+    # v2.2.3 镜像内 JDK8 过老，cgroup v2（Docker Desktop/WSL2）下启动必 NPE 崩溃循环，v2.4.3 已修复
+    image: nacos/nacos-server:v2.4.3
+    container_name: yitai-nacos
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      MODE: standalone
+      NACOS_AUTH_ENABLE: "false"
+      JVM_XMS: 256m
+      JVM_XMX: 512m
+      # 内嵌 Derby 在 Windows Docker Desktop 下初始化 NPE（已实测崩溃循环），改用 MySQL 持久化
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: mysql
+      MYSQL_SERVICE_PORT: "3306"
+      MYSQL_SERVICE_DB_NAME: nacos_config
+      MYSQL_SERVICE_USER: root
+      MYSQL_SERVICE_PASSWORD: root
+      MYSQL_SERVICE_DB_PARAM: characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
+    ports:
+      - "8848:8848"   # 控制台/HTTP
+      - "9848:9848"   # gRPC（客户端 2.x 必需）
+
+  elasticsearch:
+    build:
+      context: ./docker/es
+    image: yitai/es-ik:7.17.26
+    container_name: yitai-es
+    restart: unless-stopped
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      TZ: Asia/Shanghai
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+
+  minio:
+    image: minio/minio:latest
+    container_name: yitai-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  # ===================== 后端微服务 =====================
+  # 通用说明：
+  #   - build.context 指向各服务模块目录，里面已放好 Dockerfile + 宿主机打出的 target/*.jar
+  #   - environment 把中间件地址从 localhost 改成本 compose 网络里的「服务名」
+  #   - depends_on 只保证启动顺序（不保证中间件「就绪」），Spring 自身有重连重试
+
+  server-gateway:
+    build:
+      context: ./backend/server-gateway
+    image: yitai/server-gateway:latest
+    container_name: yitai-gateway
+    restart: unless-stopped
+    ports:
+      - "8500:8500"   # 网关对外暴露，前端/浏览器访问入口
+    environment:
+      NACOS_HOST: nacos
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+    depends_on:
+      nacos:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  service-product:
+    build:
+      context: ./backend/service/service-product
+    image: yitai/service-product:latest
+    container_name: yitai-service-product
+    restart: unless-stopped
+    environment:
+      NACOS_HOST: nacos
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+      ELASTICSEARCH_HOST: elasticsearch
+    depends_on:
+      nacos:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      elasticsearch:
+        condition: service_started
+
+  service-user:
+    build:
+      context: ./backend/service/service-user
+    image: yitai/service-user:latest
+    container_name: yitai-service-user
+    restart: unless-stopped
+    environment:
+      NACOS_HOST: nacos
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+    depends_on:
+      nacos:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  service-order:
+    build:
+      context: ./backend/service/service-order
+    image: yitai/service-order:latest
+    container_name: yitai-service-order
+    restart: unless-stopped
+    environment:
+      NACOS_HOST: nacos
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+    depends_on:
+      nacos:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  service-cart:
+    build:
+      context: ./backend/service/service-cart
+    image: yitai/service-cart:latest
+    container_name: yitai-service-cart
+    restart: unless-stopped
+    environment:
+      NACOS_HOST: nacos
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+    depends_on:
+      nacos:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  service-pay:
+    build:
+      context: ./backend/service/service-pay
+    image: yitai/service-pay:latest
+    container_name: yitai-service-pay
+    restart: unless-stopped
+    environment:
+      NACOS_HOST: nacos
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+    depends_on:
+      nacos:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  service-ai:
+    build:
+      context: ./backend/service/service-ai
+    image: yitai/service-ai:latest
+    container_name: yitai-service-ai
+    restart: unless-stopped
+    ports:
+      - "18600:8600"   # 对外暴露便于直接调试 AI 接口（宿主机 8600 常被本机进程占用，故映射到 18600）
+    environment:
+      NACOS_HOST: nacos
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+      # 默认 dev + mock：无需任何 key 即可 clone 即跑（规则兜底，看到完整交互）。
+      # 若要真实大模型：在 .env 设 AI_PROFILE=local 与 AI_PROVIDER=openai、AI_API_KEY=你的key
+      # （application-local.yml 含真实密钥，已被 .gitignore 排除，不会进仓库）。
+      SPRING_PROFILES_ACTIVE: ${AI_PROFILE:-dev}
+      AI_PROVIDER: ${AI_PROVIDER:-mock}
+      AI_BASE_URL: ${AI_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode}
+      AI_MODEL: ${AI_MODEL:-deepseek-v4-flash}
+      AI_API_KEY: ${AI_API_KEY:-}
+    depends_on:
+      nacos:
+        condition: service_started
+
+  manager:
+    build:
+      context: ./backend/manager
+    image: yitai/manager:latest
+    container_name: yitai-manager
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    environment:
+      NACOS_HOST: nacos
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+      MINIO_HOST: minio
+    depends_on:
+      nacos:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+
+volumes:
+  mysql_data:
+  redis_data:
+  es_data:
+  minio_data:

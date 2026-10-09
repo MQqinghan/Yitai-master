@@ -1,0 +1,74 @@
+server:
+  port: 8513
+  tomcat:
+    threads:
+      max: 300
+      min-spare: 30
+    accept-count: 500
+    max-connections: 8000
+
+spring:
+  application:
+    name: service-cart
+
+  # 配置 Nacos Config（可选，如果不需要可以禁用）
+  cloud:
+    nacos:
+      config:
+        enabled: false
+      discovery:
+        server-addr: ${NACOS_HOST:localhost}:8848   # 服务注册
+
+  # MySQL 数据库配置
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/yitai_mall?characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&connectTimeout=5000&socketTimeout=10000
+    username: root
+    password: ${MYSQL_PASSWORD:root}
+    hikari:
+      maximum-pool-size: 50
+      minimum-idle: 10
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      pool-name: CartHikariCP
+
+  # Redis 配置
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+      lettuce:
+        pool:
+          max-active: 150
+          max-idle: 75
+          min-idle: 15
+          max-wait: 3000
+  
+  # Spring Retry 配置（OpenFeign重试依赖）
+  retry:
+    enabled: true               # 启用重试机制
+
+# MyBatis 配置
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# OpenFeign 配置
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000    # 连接超时时间（毫秒）
+        readTimeout: 10000      # 读取超时时间（毫秒）
+  compression:
+    request:
+      enabled: true             # 启用请求压缩
+    response:
+      enabled: true             # 启用响应压缩
+  # OpenFeign 重试配置
+  okhttp:
+    enabled: true               # 启用OkHttp客户端

@@ -1,0 +1,352 @@
+/* 全局样式 */
+.home-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 10px;
+    padding-bottom: 60px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 20px 0 10px;
+    color: #333;
+}
+
+/* ========== PC端布局 ========== */
+.pc-layout {
+    display: block;
+}
+
+/* 广告轮播区 */
+.ad-banner-section {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+/* 左侧分类栏 */
+.category-column {
+    width: 180px;
+}
+.category-menu {
+    height: 450px;
+    border-right: none;
+}
+.category-menu .el-menu-item {
+    height: 45px;
+    line-height: 45px;
+}
+
+/* 中间广告轮播 */
+.ad-banner {
+    flex: 1;
+}
+.banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 右侧三个盒子 */
+.right-boxes {
+    width: 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.box-item {
+    border: 1px solid #eee;
+    padding: 5px;
+    text-align: center;
+}
+.box-img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+}
+.box-text {
+    font-size: 12px;
+    margin-top: 5px;
+    color: #666;
+}
+
+/* 畅销商品轮播 */
+.hot-sales-section {
+    margin-bottom: 30px;
+}
+
+/* 新增：商品卡片容器 - 控制一行3个 */
+.product-card-container {
+    display: flex;          /* 弹性布局：横向排列 */
+    justify-content: space-around; /* 均匀分布，左右留空 */
+    align-items: center;    /* 垂直居中 */
+    width: 100%;            /* 占满轮播项宽度 */
+    height: 100%;           /* 占满轮播项高度（300px） */
+    padding: 0 20px;        /* 左右内边距，避免贴边 */
+}
+
+.product-card {
+    text-align: center;
+    padding: 10px;
+    flex: 1;                /* 每个卡片等分宽度 */
+    max-width: 200px;       /* 限制卡片最大宽度，避免变形 */
+    margin: 0 10px;         /* 卡片之间的间距 */
+}
+
+.product-img {
+    width: 100%;            /* 改为百分比，适配容器宽度 */
+    max-width: 200px;       /* 最大宽度不变 */
+    height: 200px;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.product-name {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+    white-space: nowrap;    /* 防止商品名换行导致高度不一致 */
+    overflow: hidden;       /* 超出隐藏 */
+    text-overflow: ellipsis;/* 超出显示省略号 */
+}
+
+.product-price {
+    color: #e64340;
+    font-weight: 600;
+}
+/* ========== 移动端布局 ========== */
+.mobile-layout {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .home-container {
+        max-width: 100%;
+        padding: 0 8px;
+        padding-bottom: 70px;
+    }
+
+    .pc-layout {
+        display: none;
+    }
+    .mobile-layout {
+        display: block;
+    }
+
+    /* 移动端分类栏（两行五列） */
+    .mobile-category {
+        padding: 10px 0;
+        background: #fff;
+        margin-bottom: 10px;
+    }
+    .category-scroll {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px 0;
+        padding: 0 10px;
+    }
+    .category-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: auto;
+        cursor: pointer;
+        padding: 5px 0;
+    }
+    .category-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 5px;
+        overflow: hidden;
+    }
+    .category-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .category-name {
+        font-size: 11px;
+        color: #333;
+        text-align: center;
+        line-height: 1.2;
+        max-width: 60px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* 移动端热销商品 */
+    .mobile-hot-sales {
+        background: #fff;
+        padding: 10px 5px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+    .mobile-hot-sales .section-title {
+        font-size: 16px;
+        margin: 0 0 10px 0;
+        padding-left: 5px;
+        border-left: 3px solid #409eff;
+    }
+    .product-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .mobile-product-card {
+        width: calc(50% - 4px);
+        background: #f9f9f9;
+        border-radius: 6px;
+        padding: 8px;
+    }
+    .mobile-product-img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 4px;
+        margin-bottom: 5px;
+    }
+    .mobile-product-name {
+        font-size: 12px;
+        color: #333;
+        margin-bottom: 5px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 28px;
+    }
+    .mobile-product-price {
+        color: #e64340;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    /* 猜你喜欢 - 移动端（参考个人中心样式） */
+    .guess-like-section {
+        padding: 10px 8px 20px;
+        background: #fff;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+    .guess-like-section .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        margin: 0 0 15px 0;
+    }
+    .like-list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        flex-wrap: unset;
+    }
+    .like-card {
+        width: 100%;
+        background-color: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+    .like-img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+    .like-name {
+        font-size: 14px;
+        color: #333;
+        padding: 8px 10px 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .like-price {
+        font-size: 16px;
+        font-weight: 600;
+        color: #ff4d4f;
+        padding: 0 10px 10px;
+        display: block;
+    }
+
+    /* 通用标题 */
+    .section-title {
+        font-size: 16px;
+        margin: 15px 0 10px;
+    }
+}
+
+/* ========== 猜你喜欢（PC端） ========== */
+@media (min-width: 768px) {
+    .guess-like-section {
+        margin-top: 30px;
+    }
+    .like-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    .like-card {
+        width: calc(25% - 15px);
+        text-align: center;
+    }
+    .like-img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        margin-bottom: 5px;
+    }
+    .like-name {
+        font-size: 12px;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    .like-price {
+        color: #e64340;
+        font-size: 14px;
+    }
+}
+
+/* 加载更多样式 */
+.loading-more {
+    width: 100%;
+    padding: 20px 0;
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.loading-icon {
+    font-size: 20px;
+    animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 加载完成样式 */
+.load-complete {
+    width: 100%;
+    padding: 20px 0;
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+}

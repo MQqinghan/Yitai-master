@@ -1,0 +1,10 @@
+- generic [ref=e4]:
+  - heading "以太购物后台管理系统" [level=1] [ref=e5]
+  - textbox "用户名" [ref=e14]: admin
+  - generic [ref=e18]:
+    - textbox "密码" [ref=e24]: "123456"
+    - generic [ref=e26] [cursor=pointer]
+  - generic [ref=e32]:
+    - textbox "请输入验证码" [ref=e40]
+    - img [ref=e41] [cursor=pointer]
+  - button "登录" [ref=e44] [cursor=pointer]

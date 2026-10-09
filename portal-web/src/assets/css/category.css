@@ -1,0 +1,145 @@
+/* 全局样式：仅移动端生效 */
+.category-page {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #f8f8f8;
+}
+
+/* 顶部标题栏：含返回箭头 */
+.page-header {
+    height: 48px;
+    line-height: 48px;
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    text-align: center;
+    position: relative; /* 用于定位返回箭头 */
+    padding: 0;
+}
+
+/* 返回箭头样式（左上角） */
+.back-home-btn {
+    width: 66px; /* 固定宽度，仅占左侧 */
+    height: 48px; /* 和顶部栏同高 */
+    padding: 0 ;
+    margin: 0 ;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333 !important;
+    font-size: 20px ;
+    background: transparent ;
+    border: none ;
+    box-shadow: none;
+    flex-shrink: 0; /* 关键：禁止按钮收缩，避免挤压标题 */
+}
+
+.back-home-btn :deep(.el-icon) {
+    font-size: 20px ;
+    color: #333 ;
+}
+/* 分类标题（居中） */
+.page-title {
+    flex: 1;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+/* 分类容器：左侧垂直栏 + 右侧内容区 */
+.category-container {
+    display: flex;
+    height: calc(100vh - 48px); /* 减去顶部栏高度 */
+}
+
+/* 左侧：垂直一级分类（参考图核心样式） */
+.first-category-sidebar {
+    width: 25%;
+    background-color: #fff;
+    border-right: 1px solid #eee;
+    overflow-y: auto; /* 分类过多时可滚动 */
+    -webkit-overflow-scrolling: touch;
+}
+.first-item {
+    padding: 15px 10px;
+    font-size: 15px;
+    color: #666;
+    text-align: center;
+    cursor: pointer;
+    border-left: 3px solid transparent; /* 选中态左侧红条占位 */
+    transition: all 0.2s;
+}
+.first-item.active {
+    color: #ff4444; /* 参考图红色文字 */
+    background-color: #fef5f5; /* 参考图浅红背景 */
+    border-left: 3px solid #ff4444; /* 参考图左侧红条高亮 */
+}
+
+/* 右侧：内容区（参考图样式） */
+.category-content {
+    width: 75%;
+    padding: 15px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 空状态提示 */
+.empty-tip {
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+    padding: 50px 0;
+}
+
+/* 二级分类卡片（参考图白色卡片） */
+.second-category {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* 二级分类标题 */
+.second-title {
+    font-size: 16px;
+    color: #333;
+    margin: 0 0 12px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* 三级分类列表（参考图5列布局） */
+.third-category-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* 参考图间距 */
+}
+.third-item {
+    width: calc(20% - 8px); /* 5列布局，减去间距 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}
+.third-img {
+    width: 55px; /* 参考图图片大小 */
+    height: 55px;
+    object-fit: cover;
+    border-radius: 8px; /* 参考图方形圆角图片 */
+    margin-bottom: 5px;
+}
+.third-name {
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+    line-height: 1.2;
+}
+
+/* 强制隐藏PC端，仅移动端显示 */
+@media (min-width: 768px) {
+    .category-page {
+        display: none !important;
+    }
+}

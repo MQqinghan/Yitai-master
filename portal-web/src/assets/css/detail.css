@@ -1,0 +1,253 @@
+/* ===================================== */
+/* 一、全局通用样式 */
+/* ===================================== */
+.product-detail {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.carousel-img {
+    width: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.product-name {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.sku-name {
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.price-box {
+    padding: 10px 0;
+    border-top: 1px dashed #eee;
+    border-bottom: 1px dashed #eee;
+    margin-bottom: 15px;
+}
+
+.market-price {
+    font-size: 14px;
+    color: #999;
+    text-decoration: line-through;
+    margin-right: 15px;
+}
+
+.sale-price {
+    font-size: 24px;
+    color: #f56c6c;
+    font-weight: bold;
+}
+
+.stock {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.spec-group {
+    margin-bottom: 20px;
+}
+
+.spec-group label {
+    width: 60px;
+    display: inline-block;
+    color: #666;
+}
+
+.spec-list {
+    display: inline-flex;
+    gap: 10px;
+}
+
+/* 商品详情图 */
+.detail-images {
+    margin-top: 60px;
+}
+
+.detail-images h3 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.detail-img {
+    width: 100%;
+    display: block;
+    margin-bottom: 10px;
+}
+
+/* 收藏按钮通用样式 */
+.collect-btn {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #dcdfe6;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #999;
+    transition: all 0.2s;
+}
+.collect-btn.collected {
+    color: #ff6b6b;
+    border-color: #ff6b6b;
+}
+.collect-btn:hover {
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+}
+.collect-btn .el-icon {
+    font-size: 20px;
+}
+
+/* 自定义规格按钮样式 */
+.spec-btn {
+    padding: 4px 12px;
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #606266;
+    background-color: #fff;
+}
+.spec-btn.active {
+    border-color: #409eff;
+    background-color: #409eff;
+    color: #fff;
+}
+.spec-btn:hover {
+    border-color: #c0c4cc;
+}
+.spec-btn.active:hover {
+    border-color: #66b1ff;
+    background-color: #66b1ff;
+}
+
+/* ===================================== */
+/* PC 端专属样式 */
+/* ===================================== */
+.detail-container {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+.detail-left {
+    width: 400px;
+}
+
+.detail-right {
+    flex: 1;
+}
+
+.carousel-img {
+    height: 400px;
+}
+
+.action-box {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 30px;
+}
+.action-box .collect-btn {
+    width: 44px;
+    height: 44px;
+}
+.add-cart {
+    width: 200px;
+}
+.buy-now {
+    width: 150px;
+}
+
+/* ===================================== */
+/* 移动端样式 */
+/* ===================================== */
+@media (max-width: 767px) {
+    .product-detail {
+        padding: 0 0 60px 0;
+    }
+
+    .mobile-layout .el-carousel {
+        position: relative;
+    }
+    .carousel-img {
+        height: 250px;
+    }
+
+    .float-back {
+        position: absolute;
+        top: 50px;
+        left: 15px;
+        z-index: 10;
+        width: 32px;
+        height: 32px;
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    .mobile-info {
+        padding: 15px;
+    }
+    .mobile-info h3 {
+        font-size: 16px;
+        margin-bottom: 5px;
+    }
+    .price {
+        margin: 10px 0;
+    }
+    .price .sale {
+        font-size: 20px;
+        color: #f56c6c;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+    .price .market {
+        color: #999;
+        text-decoration: line-through;
+    }
+
+    .mobile-spec {
+        padding: 0 15px;
+    }
+
+    .mobile-bottom {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: #fff;
+        border-top: 1px solid #eee;
+        padding: 10px 15px;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .mobile-collect {
+        width: 40px;
+        height: 40px;
+        flex: none;
+    }
+    .mobile-bottom .el-button {
+        flex: 1;
+        height: 40px;
+    }
+
+    .detail-images {
+        padding: 15px;
+    }
+}

@@ -1,0 +1,490 @@
+/* 全局重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.my-page {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+}
+
+/* ==================== 移动端样式 ==================== */
+.mobile-my {
+    width: 100%;
+}
+
+/* 顶部个人信息栏 */
+.mobile-header {
+    position: relative;
+    width: 100%;
+    height: 260px;
+    background: linear-gradient(135deg, #ff7a7a 0%, #ffb199 100%);
+    border-radius: 0 0 20px 20px;
+    overflow: hidden;
+}
+
+.header-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.8;
+}
+
+/* 新增：右上角消息+设置图标容器 */
+.header-actions {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    z-index: 10;
+}
+
+.action-icon {
+    font-size: 28px;
+    color: #fff;
+    cursor: pointer;
+}
+
+.message-icon {
+    position: relative;
+}
+
+/* 消息红点（参考原图右上角红点） */
+.message-icon::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 10px;
+    height: 10px;
+    background-color: #ff3333;
+    border-radius: 50%;
+}
+
+/* 其余原有样式完全不变，直接保留 */
+.user-info {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 30px 20px 15px;
+    z-index: 1;
+}
+.avatar-box {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    overflow: hidden;
+    margin-right: 15px;
+}
+.avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.user-name {
+    font-size: 22px;
+    font-weight: 600;
+    color: #fff;
+}
+.member-bar {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px 15px;
+    z-index: 1;
+}
+.member-tag {
+    font-size: 16px;
+    color: #fff;
+    opacity: 0.8;
+}
+.open-btn {
+    font-size: 14px;
+    color: #fff;
+    padding: 4px 12px;
+    border: 1px solid #fff;
+    border-radius: 12px;
+}
+.stats-row {
+    position: relative;
+    display: flex;
+    justify-content: space-around;
+    padding: 15px 0;
+    background-color: #fff;
+    margin: 0 15px;
+    border-radius: 12px;
+    transform: translateY(10px);
+    z-index: 2;
+}
+.stats-item {
+    text-align: center;
+}
+.stats-value {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+.stats-label {
+    font-size: 14px;
+    color: #666;
+}
+
+/* 订单快捷入口 */
+.order-nav {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px 0;
+    background-color: #fff;
+    margin: 20px 15px;
+    border-radius: 12px;
+}
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}
+.nav-icon {
+    font-size: 28px;
+    color: #ff6b6b;
+    margin-bottom: 6px;
+}
+.nav-item span {
+    font-size: 14px;
+    color: #333;
+}
+
+/* 功能入口栏 */
+.func-nav {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px 0;
+    background-color: #fff;
+    margin: 0 15px 20px;
+    border-radius: 12px;
+}
+
+/* 猜你喜欢 */
+.guess-like-section {
+    padding: 0 15px 20px;
+}
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+}
+.like-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+.like-card {
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+}
+.like-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+.like-name {
+    font-size: 14px;
+    color: #333;
+    padding: 8px 10px 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.like-price {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ff4d4f;
+    padding: 0 10px 10px;
+    display: block;
+}
+
+/* ==================== PC端样式（完全不变） ==================== */
+.pc-my {
+    width: 100%;
+    padding: 30px 0;
+    background-color: #f5f5f5;
+}
+.pc-container {
+    display: flex;
+    width: 1200px;
+    margin: 0 auto;
+    gap: 20px;
+}
+.pc-left-menu {
+    width: 200px;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px 0;
+    flex-shrink: 0;
+    position: sticky;
+    top: 80px;
+    align-self: flex-start;
+}
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.menu-item:hover {
+    background-color: #f5f5f5;
+}
+.menu-item .el-icon {
+    font-size: 20px;
+    color: #666;
+    margin-right: 10px;
+}
+.menu-item span {
+    font-size: 15px;
+    color: #333;
+}
+.pc-right-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.info-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 30px;
+    background: linear-gradient(135deg, #ff7a7a 0%, #ffb199 100%);
+    color: #fff;
+}
+.info-left {
+    display: flex;
+    align-items: center;
+}
+.info-left .avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    margin-right: 15px;
+}
+.info-text .user-name {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+.info-text .user-desc {
+    font-size: 14px;
+    opacity: 0.8;
+}
+.info-right {
+    display: flex;
+    gap: 40px;
+}
+.info-right .stats-item {
+    text-align: center;
+}
+.info-right .stats-value {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+.info-right .stats-label {
+    font-size: 14px;
+    opacity: 0.8;
+}
+.order-section {
+    display: flex;
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.order-left {
+    flex: 3;
+    padding: 20px;
+    border-right: 1px solid #f0f0f0;
+}
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.section-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+.more-link {
+    font-size: 14px;
+    color: #999;
+    cursor: pointer;
+}
+.order-tabs {
+    display: flex;
+    justify-content: space-between;
+}
+.tab-item {
+    font-size: 15px;
+    color: #666;
+    cursor: pointer;
+    padding: 8px 0;
+    position: relative;
+}
+.tab-item:hover {
+    color: #ff4d4f;
+}
+
+/* 订单数量徽章 */
+.badge {
+    position: absolute;
+    top: 0;
+    right: -8px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    background: #f56c6c;
+    color: #fff;
+    font-size: 11px;
+    line-height: 18px;
+    text-align: center;
+    border-radius: 9px;
+    transform: translateX(100%);
+}
+.order-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+}
+.quick-entry {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+.quick-entry .el-icon {
+    font-size: 22px;
+    color: #ff6b6b;
+    margin-right: 10px;
+}
+.quick-entry span {
+    font-size: 15px;
+    color: #333;
+}
+.history-section {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+}
+.history-list {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+.history-item {
+    flex-shrink: 0;
+    width: 150px;
+    cursor: pointer;
+}
+.history-img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+.history-name {
+    font-size: 14px;
+    color: #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-bottom: 4px;
+}
+.history-price {
+    font-size: 15px;
+    font-weight: 600;
+    color: #ff4d4f;
+}
+.pc-right-content .guess-like-section {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+}
+.pc-right-content .like-list {
+    grid-template-columns: repeat(6, 1fr);
+}
+.pc-right-content .like-img {
+    height: 150px;
+}
+
+/* 响应式适配 */
+@media screen and (max-width: 1200px) {
+    .pc-container {
+        width: 95%;
+    }
+    .pc-right-content .like-list {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .pc-right-content .like-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* 加载更多样式 */
+.loading-more {
+    width: 100%;
+    padding: 20px 0;
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.loading-icon {
+    font-size: 20px;
+    animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 加载完成样式 */
+.load-complete {
+    width: 100%;
+    padding: 20px 0;
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+}

@@ -1,0 +1,348 @@
+@startuml 系统分层架构图
+' 设置样式
+skinparam backgroundColor white
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam rectangle {
+  BackgroundColor WhiteSmoke
+  BorderColor SteelBlue
+}
+skinparam cloud {
+  BackgroundColor LightBlue
+  BorderColor SteelBlue
+}
+skinparam database {
+  BackgroundColor LightYellow
+  BorderColor Orange
+}
+skinparam node {
+  BackgroundColor LightGreen
+  BorderColor Green
+}
+skinparam queue {
+  BackgroundColor Lavender
+  BorderColor Purple
+}
+
+title 电商微服务系统分层架构图
+
+' ==================== 客户端层 ====================
+package "客户端层 (Client Layer)" as ClientLayer {
+  rectangle "前台用户端\n(Vue 3 + TypeScript + Vite)" as FrontClient {
+    note right
+      技术栈:
+      - Vue 3.2
+      - TypeScript
+      - Axios
+      - Vue Router 4
+      
+      核心模块:
+      - 首页/商品浏览
+      - 购物车
+      - 订单管理
+      - 个人中心
+      - 收藏/消息
+    end note
+  }
+  
+  rectangle "后台管理端\n(Vue 3 + Element Plus + Vite)" as AdminClient {
+    note right
+      技术栈:
+      - Vue 3.2
+      - Element Plus 2.x
+      - Pinia
+      - ECharts 5.6
+      
+      核心模块:
+      - 系统管理(角色/用户/菜单)
+      - 商品管理(分类/品牌/规格)
+      - 订单统计
+      - 动态权限菜单
+    end note
+  }
+}
+
+' ==================== 网关层 ====================
+package "网关层 (Gateway Layer)" as GatewayLayer {
+  rectangle "API 网关\n(server-gateway:8500)\n+ 负载均衡 + 限流" as Gateway {
+    note right
+      技术栈:
+      - Spring Cloud Gateway
+      - Spring Cloud LoadBalancer
+      - Nacos 服务发现
+      
+      功能:
+      - 统一入口
+      - 路由转发
+      - 负载均衡(lb://)
+      - 限流保护(令牌桶)
+      - 认证鉴权
+      - 跨域处理
+      - 请求过滤
+      
+      负载均衡策略:
+      - 客户端负载均衡
+      - 轮询算法(Round Robin)
+      - 基于Nacos服务发现
+    end note
+  }
+}
+
+' ==================== 应用服务层 ====================
+package "应用服务层 (Application Service Layer)" as ServiceLayer {
+  
+  ' 后台管理服务(单体应用)
+  rectangle "后台管理系统\n(manager - 单体应用)" as ManagerService {
+    note right
+      架构: 单体应用(Spring Boot)
+      端口: 独立部署
+      技术: Spring Boot + MyBatis + Redis
+      
+      职责:
+      - 管理员登录/登出
+      - 用户信息管理
+      - 角色权限管理
+      - 菜单管理
+      - 订单统计分析
+      
+      接口前缀:
+      /admin/system/*
+      
+      特点:
+      - 直接访问MySQL
+      - 无Feign调用
+      - 非微服务架构
+    end note
+  }
+  
+  ' 商品微服务
+  rectangle "商品微服务\n(service-product)" as ProductService {
+    note right
+      职责:
+      - 商品CRUD
+      - 分类/品牌管理
+      - 商品搜索(ES)
+      - 推荐算法(猜你喜欢)
+      - 收藏功能
+      - 浏览历史
+      
+      接口前缀:
+      /product/*
+    end note
+  }
+  
+  ' 订单微服务
+  rectangle "订单微服务\n(service-order)" as OrderService {
+    note right
+      职责:
+      - 购物车管理
+      - 订单创建/查询
+      - 订单状态管理
+      - 支付集成(支付宝)
+      
+      接口前缀:
+      /order/cart/*
+      /order/orderInfo/*
+      /order/alipay/*
+    end note
+  }
+  
+  ' 用户微服务
+  rectangle "用户微服务\n(service-user)" as UserService {
+    note right
+      职责:
+      - 用户注册/登录
+      - 用户信息管理
+      - 收货地址管理
+      - 短信验证码
+      - 消息中心
+      
+      接口前缀:
+      /user/userInfo/*
+      /user/userAddress/*
+      /user/sms/*
+      /user/message/*
+    end note
+  }
+}
+
+' ==================== 公共组件层 ====================
+package "公共组件层 (Common Layer)" as CommonLayer {
+  rectangle "通用服务模块\n(common-service)" as CommonModule {
+    note right
+      功能:
+      - 全局异常处理
+      - Feign客户端配置
+      - 拦截器
+      - 自定义注解
+    end note
+  }
+  
+  rectangle "日志模块\n(common-log)" as LogModule {
+    note right
+      功能:
+      - 操作日志记录
+      - AOP切面
+      - 日志注解
+    end note
+  }
+  
+  rectangle "工具类模块\n(common-util)" as UtilModule {
+    note right
+      功能:
+      - AuthContextUtil
+      - HttpUtils
+      - 通用工具方法
+    end note
+  }
+}
+
+' ==================== 数据模型层 ====================
+package "数据模型层 (Model Layer)" as ModelLayer {
+  rectangle "数据模型\n(model)" as DataModel {
+    note right
+      包含:
+      - Entity (实体类)
+      - DTO (数据传输对象)
+      - VO (视图对象)
+      
+      模块划分:
+      - system (系统相关)
+      - product (商品相关)
+      - order (订单相关)
+      - user (用户相关)
+      - pay (支付相关)
+    end note
+  }
+}
+
+' ==================== 数据存储层 ====================
+package "数据存储层 (Data Storage Layer)" as StorageLayer {
+  database "MySQL\n(主数据库)" as MySQL {
+    note right
+      存储内容:
+      - 用户数据
+      - 商品数据
+      - 订单数据
+      - 系统配置
+      - 权限数据
+    end note
+  }
+  
+  database "Redis\n(缓存数据库 + 限流)" as Redis {
+    note right
+      用途:
+      - Token缓存
+      - 购物车缓存
+      - 验证码缓存
+      - 热点数据缓存
+      - 分布式锁
+      - Gateway限流(令牌桶)
+    end note
+  }
+  
+  database "Nacos\n(服务注册与发现)" as Nacos {
+    note right
+      用途:
+      - 服务注册中心
+      - 配置中心
+      - 服务发现
+      - 负载均衡策略
+      
+      地址: localhost:8848
+    end note
+  }
+  
+  database "Elasticsearch\n(搜索引擎)" as ES {
+    note right
+      用途:
+      - 商品全文检索
+      - 智能搜索
+      - 搜索建议
+    end note
+  }
+}
+
+' ==================== 外部服务层 ====================
+cloud "外部服务层 (External Services)" as ExternalLayer {
+  rectangle "支付宝沙箱\n(支付服务)" as Alipay {
+    note right
+      功能:
+      - 在线支付
+      - 支付回调
+      - 订单状态同步
+    end note
+  }
+}
+
+' ==================== 调用关系 ====================
+
+' 前端到网关
+FrontClient --> Gateway : HTTP请求\n/api/*
+AdminClient --> Gateway : HTTP请求\n/admin/system/*
+
+' 网关到各服务(通过Nacos负载均衡)
+Gateway --> ManagerService : 路由转发
+Gateway --> ProductService : lb://service-product
+Gateway --> OrderService : lb://service-order
+Gateway --> UserService : lb://service-user
+
+' Nacos服务注册与发现
+Gateway ..> Nacos : 服务发现
+ProductService ..> Nacos : 服务注册
+OrderService ..> Nacos : 服务注册
+UserService ..> Nacos : 服务注册
+
+' 微服务之间的调用(Feign) - manager不参与
+ProductService ..> UserService : Feign调用
+OrderService ..> ProductService : Feign调用
+OrderService ..> UserService : Feign调用
+
+' 微服务到公共组件
+ManagerService --> CommonModule : 依赖
+ProductService --> CommonModule : 依赖
+OrderService --> CommonModule : 依赖
+UserService --> CommonModule : 依赖
+
+ManagerService --> LogModule : 日志记录
+ProductService --> LogModule : 日志记录
+OrderService --> LogModule : 日志记录
+UserService --> LogModule : 日志记录
+
+' 微服务到数据模型
+ManagerService --> DataModel : 使用
+ProductService --> DataModel : 使用
+OrderService --> DataModel : 使用
+UserService --> DataModel : 使用
+
+' 后台管理系统直接访问数据库
+ManagerService --> MySQL : JDBC/MyBatis
+ManagerService --> Redis : 缓存操作
+
+' 微服务访问数据存储
+ProductService --> MySQL : JDBC/MyBatis
+OrderService --> MySQL : JDBC/MyBatis
+UserService --> MySQL : JDBC/MyBatis
+
+ProductService --> Redis : 缓存操作
+OrderService --> Redis : 购物车/Token
+UserService --> Redis : 验证码/Token
+
+ProductService --> ES : 商品搜索
+
+' 外部服务调用
+OrderService --> Alipay : 支付请求
+Alipay --> OrderService : 支付回调
+
+' ==================== 图例说明 ====================
+legend right
+  |= 符号 |= 含义 |
+  | --> | 直接调用/依赖 |
+  | ..> | Feign远程调用 |
+  | 实线矩形 | 应用服务/组件 |
+  | 圆柱体 | 数据存储 |
+  | 云朵 | 外部服务 |
+endlegend
+
+@enduml

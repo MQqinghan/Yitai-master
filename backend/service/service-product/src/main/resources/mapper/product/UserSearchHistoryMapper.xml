@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yitai.product.mapper.UserSearchHistoryMapper">
+
+    <!-- 添加或更新搜索记录 -->
+    <insert id="insertOrUpdate">
+        INSERT INTO user_search_history (user_id, keyword, search_count, create_time, update_time, is_deleted)
+        VALUES (#{userId}, #{keyword}, 1, NOW(), NOW(), 0)
+        ON DUPLICATE KEY UPDATE
+            search_count = search_count + 1,
+            update_time = NOW()
+    </insert>
+
+    <!-- 统计用户搜索最多的关键词 -->
+    <select id="selectTopKeywords" resultType="java.util.Map">
+        SELECT
+            keyword,
+            1 AS searchCount
+        FROM user_search_history
+        WHERE user_id = #{userId}
+          AND is_deleted = 0
+        GROUP BY keyword
+        ORDER BY MAX(update_time) DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

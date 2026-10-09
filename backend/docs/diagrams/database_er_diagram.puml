@@ -1,0 +1,444 @@
+@startuml 数据库ER图
+' 设置样式
+skinparam backgroundColor white
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+title 电商系统数据库ER图
+
+' ==================== 系统管理模块 ====================
+package "系统管理模块 (System Management)" <<Rectangle>> {
+  
+  entity "sys_user\n系统用户表" as sys_user {
+    id : bigint PK
+    --
+    username : varchar(50)
+    password : varchar(50)
+    salt : varchar(50)
+    name : varchar(50)
+    phone : varchar(20)
+    avatar : varchar(200)
+    description : varchar(255)
+    status : tinyint
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "sys_role\n角色表" as sys_role {
+    id : bigint PK
+    --
+    role_name : varchar(50)
+    role_code : varchar(50)
+    description : varchar(255)
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "sys_menu\n菜单表" as sys_menu {
+    id : bigint PK
+    --
+    parent_id : bigint
+    title : varchar(50)
+    component : varchar(100)
+    sort_value : int
+    status : tinyint
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "sys_role_user\n角色用户关联表" as sys_role_user {
+    id : bigint PK
+    --
+    role_id : bigint FK
+    user_id : bigint FK
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "sys_role_menu\n角色菜单关联表" as sys_role_menu {
+    id : bigint PK
+    --
+    role_id : bigint FK
+    menu_id : bigint FK
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "sys_oper_log\n操作日志表" as sys_oper_log {
+    id : bigint PK
+    --
+    module : varchar(50)
+    operation : varchar(50)
+    method : varchar(100)
+    request_method : varchar(10)
+    operator : varchar(50)
+    oper_url : varchar(255)
+    oper_ip : varchar(50)
+    oper_param : text
+    json_result : text
+    status : tinyint
+    error_msg : text
+    oper_time : datetime
+  }
+}
+
+' ==================== 商品模块 ====================
+package "商品模块 (Product)" <<Rectangle>> {
+  
+  entity "product\n商品表" as product {
+    id : bigint PK
+    --
+    name : varchar(100)
+    brand_id : bigint FK
+    category1_id : bigint FK
+    category2_id : bigint FK
+    category3_id : bigint FK
+    unit_name : varchar(50)
+    slider_urls : text
+    spec_value : text
+    details_image_urls : text
+    status : tinyint
+    audit_status : tinyint
+    audit_message : varchar(255)
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "product_sku\n商品SKU表" as product_sku {
+    id : bigint PK
+    --
+    sku_code : varchar(50)
+    sku_name : varchar(100)
+    product_id : bigint FK
+    thumb_img : varchar(200)
+    sale_price : decimal(10,2)
+    market_price : decimal(10,2)
+    cost_price : decimal(10,2)
+    stock_num : int
+    sale_num : int
+    sku_spec : text
+    weight : varchar(50)
+    volume : varchar(50)
+    status : tinyint
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "category\n商品分类表" as category {
+    id : bigint PK
+    --
+    name : varchar(50)
+    image_url : varchar(200)
+    parent_id : bigint
+    status : tinyint
+    order_num : int
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "brand\n品牌表" as brand {
+    id : bigint PK
+    --
+    name : varchar(50)
+    logo : varchar(200)
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "category_brand\n分类品牌关联表" as category_brand {
+    id : bigint PK
+    --
+    brand_id : bigint FK
+    category_id : bigint FK
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "product_spec\n商品规格表" as product_spec {
+    id : bigint PK
+    --
+    spec_name : varchar(50)
+    spec_value : text
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "product_unit\n商品单位表" as product_unit {
+    id : bigint PK
+    --
+    name : varchar(50)
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "user_collect\n用户收藏表" as user_collect {
+    id : bigint PK
+    --
+    user_id : bigint FK
+    sku_id : bigint FK
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "user_browse_history\n用户浏览历史表" as user_browse_history {
+    id : bigint PK
+    --
+    user_id : bigint FK
+    sku_id : bigint FK
+    browse_count : int
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "user_search_history\n用户搜索历史表" as user_search_history {
+    id : bigint PK
+    --
+    user_id : bigint FK
+    keyword : varchar(100)
+    search_count : int
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+}
+
+' ==================== 订单模块 ====================
+package "订单模块 (Order)" <<Rectangle>> {
+  
+  entity "order_info\n订单表" as order_info {
+    id : bigint PK
+    --
+    user_id : bigint FK
+    nick_name : varchar(50)
+    order_no : varchar(50)
+    coupon_id : bigint
+    total_amount : decimal(10,2)
+    coupon_amount : decimal(10,2)
+    original_total_amount : decimal(10,2)
+    feight_fee : decimal(10,2)
+    pay_type : tinyint
+    order_status : tinyint
+    receiver_name : varchar(50)
+    receiver_phone : varchar(20)
+    receiver_tag_name : varchar(50)
+    receiver_province : varchar(50)
+    receiver_city : varchar(50)
+    receiver_district : varchar(50)
+    receiver_address : varchar(255)
+    payment_time : datetime
+    delivery_time : datetime
+    receive_time : datetime
+    remark : varchar(255)
+    cancel_time : datetime
+    cancel_reason : varchar(255)
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "order_item\n订单项表" as order_item {
+    id : bigint PK
+    --
+    order_id : bigint FK
+    sku_id : bigint FK
+    sku_name : varchar(100)
+    thumb_img : varchar(200)
+    sku_price : decimal(10,2)
+    sku_num : int
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "order_log\n订单日志表" as order_log {
+    id : bigint PK
+    --
+    order_id : bigint FK
+    operate_user : varchar(50)
+    process_status : varchar(20)
+    note : varchar(255)
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "order_statistics\n订单统计表" as order_statistics {
+    id : bigint PK
+    --
+    order_date : date
+    order_count : int
+    total_amount : decimal(10,2)
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+}
+
+' ==================== 用户模块 ====================
+package "用户模块 (User)" <<Rectangle>> {
+  
+  entity "user_info\n用户信息表" as user_info {
+    id : bigint PK
+    --
+    username : varchar(50)
+    password : varchar(50)
+    nick_name : varchar(50)
+    avatar : varchar(200)
+    sex : tinyint
+    phone : varchar(20)
+    memo : varchar(255)
+    open_id : varchar(100)
+    union_id : varchar(100)
+    last_login_ip : varchar(50)
+    last_login_time : datetime
+    status : tinyint
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "user_address\n用户地址表" as user_address {
+    id : bigint PK
+    --
+    user_id : bigint FK
+    name : varchar(50)
+    phone : varchar(20)
+    tag_name : varchar(50)
+    province_code : varchar(20)
+    city_code : varchar(20)
+    district_code : varchar(20)
+    address : varchar(255)
+    full_address : varchar(500)
+    is_default : tinyint
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+  
+  entity "message_info\n消息表" as message_info {
+    id : bigint PK
+    --
+    user_id : bigint FK
+    title : varchar(200)
+    content : text
+    message_type : tinyint
+    is_read : tinyint
+    business_id : bigint
+    dedup_key : varchar(100)
+    message_level : tinyint
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+}
+
+' ==================== 购物车模块 ====================
+package "购物车模块 (Cart)" <<Rectangle>> {
+  
+  entity "cart_info\n购物车表" as cart_info {
+    id : bigint PK
+    --
+    user_id : bigint FK
+    sku_id : bigint FK
+    cart_price : decimal(10,2)
+    sku_num : int
+    img_url : varchar(200)
+    sku_name : varchar(100)
+    is_checked : tinyint
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+}
+
+' ==================== 支付模块 ====================
+package "支付模块 (Payment)" <<Rectangle>> {
+  
+  entity "payment_info\n支付信息表" as payment_info {
+    id : bigint PK
+    --
+    user_id : bigint FK
+    order_no : varchar(50)
+    pay_type : tinyint
+    out_trade_no : varchar(100)
+    amount : decimal(10,2)
+    content : varchar(255)
+    payment_status : tinyint
+    callback_time : datetime
+    callback_content : text
+    create_time : datetime
+    update_time : datetime
+    is_deleted : tinyint
+  }
+}
+
+' ==================== 表间关系 ====================
+
+' 系统管理模块关系
+sys_role_user }o--|| sys_role : 属于
+sys_role_user }o--|| sys_user : 分配给
+sys_role_menu }o--|| sys_role : 属于
+sys_role_menu }o--|| sys_menu : 分配给
+sys_menu }o--o{ sys_menu : 父子
+
+' 商品模块关系
+product_sku }o--|| product : 属于
+product }o--|| category : 三级分类
+product }o--|| category : 二级分类
+product }o--|| category : 一级分类
+product }o--|| brand : 品牌
+category_brand }o--|| brand : 品牌
+category_brand }o--|| category : 分类
+user_collect }o--|| user_info : 用户
+user_collect }o--|| product_sku : 商品
+user_browse_history }o--|| user_info : 用户
+user_browse_history }o--|| product_sku : 商品
+user_search_history }o--|| user_info : 用户
+
+' 订单模块关系
+order_info }o--|| user_info : 用户
+order_item }o--|| order_info : 订单
+order_item }o--|| product_sku : 商品
+order_log }o--|| order_info : 订单
+
+' 用户模块关系
+user_address }o--|| user_info : 用户
+message_info }o--|| user_info : 用户
+
+' 购物车模块关系
+cart_info }o--|| user_info : 用户
+cart_info }o--|| product_sku : 商品
+
+' 支付模块关系
+payment_info }o--|| user_info : 用户
+payment_info }o--|| order_info : 订单
+
+' ==================== 图例说明 ====================
+legend right
+  |= 符号 |= 含义 |
+  | PK | 主键 |
+  | FK | 外键 |
+  | }o--|| | 多对一关系 |
+  | }o--o{ | 一对多关系 |
+  | datetime | 日期时间 |
+  | decimal(10,2) | 金额类型 |
+  | tinyint | 状态/标识 |
+  | text | 长文本 |
+  | varchar(n) | 字符串(n字符) |
+endlegend
+
+@enduml

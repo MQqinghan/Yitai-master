@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yitai.manager.mapper.OrderInfoMapper">
+
+    <!--//统计前一天交易金额-->
+    <select id="selectStatisticsByDate" resultType="com.yitai.model.entity.order.OrderStatistics">
+        SELECT  DATE_FORMAT(o.create_time,'%Y-%m-%d') AS orderDate,
+                SUM(o.total_amount) AS totalAmount,
+                COUNT(o.id) AS totalNum
+        FROM order_info o
+        WHERE DATE_FORMAT(o.create_time,'%Y-%m-%d')=#{createDate}
+        GROUP BY DATE_FORMAT(o.create_time,'%Y-%m-%d')
+    </select>
+
+    <!--实时查询日期范围内的订单统计数据（按天分组）-->
+    <select id="selectStatisticsByDateRange" resultType="com.yitai.model.entity.order.OrderStatistics">
+        SELECT  DATE_FORMAT(o.create_time,'%Y-%m-%d') AS orderDate,
+                SUM(o.total_amount) AS totalAmount,
+                COUNT(o.id) AS totalNum
+        FROM order_info o
+        WHERE DATE_FORMAT(o.create_time,'%Y-%m-%d') >= #{startDate}
+          AND DATE_FORMAT(o.create_time,'%Y-%m-%d') &lt;= #{endDate}
+        GROUP BY DATE_FORMAT(o.create_time,'%Y-%m-%d')
+        ORDER BY orderDate
+    </select>
+
+    <!--查询热销商品排行榜-->
+    <select id="selectHotProductList" resultType="com.yitai.model.vo.order.HotProductVo">
+        SELECT
+            p.id AS productId,
+            p.name AS productName,
+            ps.thumb_img AS thumbImg,
+            SUM(oi.sku_num) AS totalSales,
+            SUM(oi.sku_price * oi.sku_num) AS totalAmount
+        FROM order_item oi
+        INNER JOIN order_info o ON oi.order_id = o.id
+        INNER JOIN product_sku ps ON oi.sku_id = ps.id
+        INNER JOIN product p ON ps.product_id = p.id
+        WHERE o.order_status IN (1, 2, 3)
+          AND oi.is_deleted = 0
+          AND o.is_deleted = 0
+          AND ps.is_deleted = 0
+          AND p.is_deleted = 0
+        <if test="dto.createTimeBegin != null and dto.createTimeBegin != ''">
+            AND o.create_time &gt;= #{dto.createTimeBegin}
+        </if>
+        <if test="dto.createTimeEnd != null and dto.createTimeEnd != ''">
+            AND o.create_time &lt;= #{dto.createTimeEnd}
+        </if>
+        GROUP BY p.id, p.name, ps.thumb_img
+        ORDER BY totalSales DESC
+        LIMIT #{dto.limit}
+    </select>
+
+    <!--查询品类销售统计-->
+    <select id="selectCategorySalesList" resultType="com.yitai.model.vo.order.CategorySalesVo">
+        SELECT
+            p.category3_id AS categoryId,
+            c.name AS categoryName,
+            SUM(oi.sku_num) AS totalSales,
+            SUM(oi.sku_price * oi.sku_num) AS totalAmount
+        FROM order_item oi
+        INNER JOIN order_info o ON oi.order_id = o.id
+        INNER JOIN product_sku ps ON oi.sku_id = ps.id
+        INNER JOIN product p ON ps.product_id = p.id
+        LEFT JOIN category c ON p.category3_id = c.id
+        WHERE o.order_status IN (1, 2, 3)
+          AND oi.is_deleted = 0
+          AND o.is_deleted = 0
+          AND ps.is_deleted = 0
+          AND p.is_deleted = 0
+        <if test="dto.createTimeBegin != null and dto.createTimeBegin != ''">
+            AND o.create_time &gt;= #{dto.createTimeBegin}
+        </if>
+        <if test="dto.createTimeEnd != null and dto.createTimeEnd != ''">
+            AND o.create_time &lt;= #{dto.createTimeEnd}
+        </if>
+        GROUP BY p.category3_id, c.name
+        ORDER BY totalAmount DESC
+    </select>
+</mapper>

@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yitai.product.mapper.ProductSkuMapper">
+
+    <resultMap id="productSkuMap" type="com.yitai.model.entity.product.ProductSku" autoMapping="true">
+    </resultMap>
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+        id,sku_code,sku_name,product_id,thumb_img,sale_price,market_price,cost_price,stock_num,sale_num,sku_spec,weight,volume,status,create_time,update_time,is_deleted
+    </sql>
+
+   <!-- //根据商品id获取商品所有sku列表-->
+    <select id="findByProductId" resultMap="productSkuMap">
+        select <include refid="columns" />
+        from product_sku
+        where
+        product_id = #{productId}
+    </select>
+
+    <!--//2 根据skuId获取sku信息-->
+    <select id="getById" resultMap="productSkuMap">
+        select <include refid="columns" />
+        from product_sku
+        where
+        id = #{id}
+    </select>
+
+    <!--//分页查询-->
+    <select id="findByPage" resultMap="productSkuMap">
+        select
+        sku.id,sku.sku_code,sku.sku_name,sku.product_id,sku.thumb_img,sku.sale_price,sku.market_price,sku.cost_price,sku.stock_num,sku.sale_num,sku.sku_spec,sku.weight,sku.volume,sku.status,sku.create_time,sku.update_time,sku.is_deleted
+        from product_sku sku
+        left join product p on p.id = sku.product_id
+        <where>
+            <!-- 关键词搜索：同时匹配 SKU 名称、品牌名称和商品名称 -->
+            <if test="keyword != null and keyword != ''">
+                and (
+                sku.sku_name like CONCAT('%',#{keyword},'%')
+                or p.name like CONCAT('%',#{keyword},'%')
+                or p.brand_id in (
+                select id from brand where name like CONCAT('%',#{keyword},'%')
+                )
+                )
+            </if>
+            <if test="brandId != null">
+                and p.brand_id = #{brandId}
+            </if>
+            <if test="category1Id != null">
+                and p.category1_id = #{category1Id}
+            </if>
+            <if test="category2Id != null">
+                and p.category2_id = #{category2Id}
+            </if>
+            <if test="category3Id != null">
+                and p.category3_id = #{category3Id}
+            </if>
+            and p.status = 1
+            and p.audit_status = 1
+            and sku.is_deleted = 0
+            and p.is_deleted = 0
+        </where>
+        <if test="order == 1">
+            order by sku.sale_num desc
+        </if>
+        <if test="order == 2">
+            order by sku.sale_price asc
+        </if>
+        <if test="order == 3">
+            order by sku.sale_price desc
+        </if>
+    </select>
+
+    <!--//2 根据销量排序，获取前10条记录-->
+    <select id="selectProductSkuBySale" resultMap="productSkuMap">
+        SELECT sku.*
+        FROM product_sku sku
+                 INNER JOIN product p ON p.id=sku.product_id
+        WHERE p.status=1
+          AND p.is_deleted=0
+          AND sku.is_deleted=0
+        ORDER BY sku.sale_num DESC
+        LIMIT 10
+    </select>
+
+    <!--更新SKU销量-->
+    <update id="updateSaleNum">
+        update product_sku
+        set sale_num = sale_num + #{num}
+        where id = #{skuId}
+    </update>
+
+    <!--扣减库存-->
+    <update id="deductStock">
+        update product_sku
+        set stock_num = stock_num - #{num}
+        where id = #{skuId}
+        and stock_num >= #{num}
+    </update>
+
+    <!--根据类目ID列表查询商品(排除指定SKU)-->
+    <select id="selectByCategoryIdsWithExclude" resultMap="productSkuMap">
+        SELECT sku.*
+        FROM product_sku sku
+        INNER JOIN product p ON p.id = sku.product_id
+        WHERE p.category3_id IN
+        <foreach collection="categoryIds" item="categoryId" open="(" separator="," close=")">
+            #{categoryId}
+        </foreach>
+        <if test="excludedSkuIds != null and excludedSkuIds.size() > 0">
+            AND sku.id NOT IN
+            <foreach collection="excludedSkuIds" item="skuId" open="(" separator="," close=")">
+                #{skuId}
+            </foreach>
+        </if>
+        AND p.status = 1
+        AND p.is_deleted = 0
+        AND sku.is_deleted = 0
+        ORDER BY sku.sale_num DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!--统计SKU列表的类目分布-->
+    <select id="selectCategoryStatsBySkuIds" resultType="java.util.Map">
+        SELECT
+            p.category3_id AS categoryId,
+            COUNT(*) AS count
+        FROM product_sku sku
+        INNER JOIN product p ON p.id = sku.product_id
+        WHERE sku.id IN
+        <foreach collection="skuIds" item="skuId" open="(" separator="," close=")">
+            #{skuId}
+        </foreach>
+        GROUP BY p.category3_id
+    </select>
+
+    <!--查询热门商品(按销量排序)-->
+    <select id="selectHotProductSkus" resultMap="productSkuMap">
+        SELECT sku.*
+        FROM product_sku sku
+        INNER JOIN product p ON p.id = sku.product_id
+        WHERE p.status = 1
+          AND p.is_deleted = 0
+          AND sku.is_deleted = 0
+        ORDER BY sku.sale_num DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!--根据关键词查询商品类目分布-->
+    <select id="selectCategoryByKeyword" resultType="java.util.Map">
+        SELECT
+            p.category3_id AS categoryId,
+            COUNT(*) AS matchCount
+        FROM product p
+        INNER JOIN product_sku sku ON sku.product_id = p.id
+        WHERE p.status = 1
+          AND p.is_deleted = 0
+          AND sku.is_deleted = 0
+          AND (
+              p.name LIKE CONCAT('%', #{keyword}, '%')
+              OR sku.sku_name LIKE CONCAT('%', #{keyword}, '%')
+          )
+        GROUP BY p.category3_id
+        ORDER BY matchCount DESC
+        LIMIT 5
+    </select>
+
+    <!--查询所有上架商品（用于同步到Elasticsearch）-->
+    <select id="findOnlineProducts" resultMap="productSkuMap">
+        SELECT
+            sku.id, sku.sku_code, sku.sku_name, sku.product_id, sku.thumb_img,
+            sku.sale_price, sku.market_price, sku.stock_num, sku.sale_num,
+            p.name AS productName,
+            b.name AS brandName,
+            p.category1_id AS category1Id,
+            p.category2_id AS category2Id,
+            p.category3_id AS category3Id,
+            p.brand_id AS brandId
+        FROM product_sku sku
+        LEFT JOIN product p ON sku.product_id = p.id
+        LEFT JOIN brand b ON p.brand_id = b.id
+        WHERE sku.is_deleted = 0
+          AND p.status = 1
+          AND p.audit_status = 1
+    </select>
+
+    <!--根据SKU ID列表批量查询商品信息-->
+    <select id="selectByIds" resultMap="productSkuMap">
+        SELECT <include refid="columns" />
+        FROM product_sku
+        WHERE id IN
+        <foreach collection="skuIds" item="skuId" open="(" separator="," close=")">
+            #{skuId}
+        </foreach>
+        AND is_deleted = 0
+        ORDER BY FIELD(id,
+        <foreach collection="skuIds" item="skuId" separator=",">
+            #{skuId}
+        </foreach>
+        )
+    </select>
+    
+    <!-- 根据最近收藏商品的三级类目查询商品（排除指定SKU） -->
+    <select id="selectByCategory3IdWithExclude" resultMap="productSkuMap">
+        SELECT sku.*
+        FROM product_sku sku
+        INNER JOIN product p ON p.id = sku.product_id
+        WHERE p.category3_id = #{category3Id}
+        <if test="excludedSkuIds != null and excludedSkuIds.size() > 0">
+            AND sku.id NOT IN
+            <foreach collection="excludedSkuIds" item="skuId" open="(" separator="," close=")">
+                #{skuId}
+            </foreach>
+        </if>
+        AND p.status = 1
+        AND p.is_deleted = 0
+        AND sku.is_deleted = 0
+        ORDER BY sku.sale_num DESC
+        LIMIT #{limit}
+    </select>
+    
+    <!-- 根据二级类目查询商品（排除指定SKU和三级类目） -->
+    <select id="selectByCategory2IdWithExclude" resultMap="productSkuMap">
+        SELECT sku.*
+        FROM product_sku sku
+        INNER JOIN product p ON p.id = sku.product_id
+        WHERE p.category2_id = #{category2Id}
+        <if test="excludedCategory3Id != null">
+            AND p.category3_id != #{excludedCategory3Id}
+        </if>
+        <if test="excludedSkuIds != null and excludedSkuIds.size() > 0">
+            AND sku.id NOT IN
+            <foreach collection="excludedSkuIds" item="skuId" open="(" separator="," close=")">
+                #{skuId}
+            </foreach>
+        </if>
+        AND p.status = 1
+        AND p.is_deleted = 0
+        AND sku.is_deleted = 0
+        ORDER BY sku.sale_num DESC
+        LIMIT #{limit}
+    </select>
+    
+    <!-- 根据一级类目查询商品（排除指定SKU和二级类目） -->
+    <select id="selectByCategory1IdWithExclude" resultMap="productSkuMap">
+        SELECT sku.*
+        FROM product_sku sku
+        INNER JOIN product p ON p.id = sku.product_id
+        WHERE p.category1_id = #{category1Id}
+        <if test="excludedCategory2Id != null">
+            AND p.category2_id != #{excludedCategory2Id}
+        </if>
+        <if test="excludedSkuIds != null and excludedSkuIds.size() > 0">
+            AND sku.id NOT IN
+            <foreach collection="excludedSkuIds" item="skuId" open="(" separator="," close=")">
+                #{skuId}
+            </foreach>
+        </if>
+        AND p.status = 1
+        AND p.is_deleted = 0
+        AND sku.is_deleted = 0
+        ORDER BY sku.sale_num DESC
+        LIMIT #{limit}
+    </select>
+    
+    <!-- 按销量降序、ID降序查询商品（排除指定SKU），用于兜底补充 -->
+    <select id="selectBySaleAndIdWithExclude" resultMap="productSkuMap">
+        SELECT sku.*
+        FROM product_sku sku
+        INNER JOIN product p ON p.id = sku.product_id
+        WHERE p.status = 1
+          AND p.is_deleted = 0
+          AND sku.is_deleted = 0
+        <if test="excludedSkuIds != null and excludedSkuIds.size() > 0">
+            AND sku.id NOT IN
+            <foreach collection="excludedSkuIds" item="skuId" open="(" separator="," close=")">
+                #{skuId}
+            </foreach>
+        </if>
+        ORDER BY 
+            CASE WHEN sku.sale_num > 0 THEN 0 ELSE 1 END,
+            sku.sale_num DESC,
+            sku.id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+</mapper>

@@ -1,0 +1,96 @@
+/* 基础样式 */
+.search-bar {
+    width: 100%;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    transition: all 0.3s ease;
+    z-index: 99; /* 降低层级，避免拦截右键 */
+}
+
+/* 固定样式：PC/移动端通用 */
+.fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* 搜索容器居中 */
+.search-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;/*作为返回按钮的定位容器*/
+}
+/* 新增：返回首页按钮样式 */
+.back-home-btn {
+    position: absolute;
+    left: 4px; /* 移动端靠左，留出适当间距 */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.back-home-btn:hover {
+    color: #333;
+    background: transparent; /* 取消hover背景 */
+}
+/* 输入框样式 */
+.search-input {
+    width: 800px;
+    min-width: 200px;
+}
+.search-button {
+    height: 40px;
+    width: 80px;
+    border: 1px solid #eee;
+}
+
+/* 移动端适配 */
+@media (max-width: 767px) {
+    .search-bar {
+        margin-bottom: 8px;
+        padding: 6px 0;
+    }
+    .search-container {
+        padding: 0 12px;
+        justify-content: flex-start;
+    }
+    .back-home-btn {
+        left: -7px;
+        width: 32px;
+        height: 32px;
+    }
+    .search-input {
+        flex: 1;
+        margin-left: 32px;
+        max-width: calc(100vw - 110px);
+    }
+    .search-input .el-input__wrapper {
+        height: 32px;
+        border-radius: 16px;
+    }
+    .search-button {
+        width: 52px;
+        height: 32px;
+        font-size: 12px;
+        flex-shrink: 0;
+    }
+}
+/* PC端：强制隐藏返回按钮 */
+@media (min-width: 768px) {
+    .back-home-btn {
+        display: none !important;
+    }
+}

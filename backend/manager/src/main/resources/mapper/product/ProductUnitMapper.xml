@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yitai.manager.mapper.ProductUnitMapper">
+
+    <resultMap id="productUnitMap"
+               type="com.yitai.model.entity.base.ProductUnit"
+               autoMapping="true">
+        <!-- 字段完全匹配时无需手动配置，autoMapping=true 自动驼峰转换（create_time → createTime） -->
+        <!-- 若后续字段名不一致，可在此添加 <result> 配置，比如：
+        <result column="create_time" property="createTime"/>
+        -->
+    </resultMap>
+
+    <sql id="columns">
+        id, name, create_time, update_time, is_deleted
+    </sql>
+
+    <select id="findAll" resultMap="productUnitMap">
+        select <include refid="columns" />
+        from product_unit
+        where is_deleted = 0
+        order by id
+    </select>
+</mapper>

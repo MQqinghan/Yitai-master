@@ -1,0 +1,104 @@
+.pay-success-page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.success-container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 60px 40px;
+  max-width: 600px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.success-icon {
+  margin-bottom: 24px;
+  animation: scaleIn 0.5s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.success-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 16px 0;
+}
+
+.success-amount {
+  font-size: 16px;
+  color: #666;
+  margin: 0 0 8px 0;
+}
+
+.success-amount .amount {
+  font-size: 24px;
+  font-weight: 700;
+  color: #f56c6c;
+}
+
+.success-order {
+  font-size: 14px;
+  color: #999;
+  margin: 0 0 32px 0;
+}
+
+.countdown-tip {
+  background: #f0f9ff;
+  border: 1px solid #bae7ff;
+  border-radius: 8px;
+  padding: 12px 24px;
+  margin-bottom: 32px;
+}
+
+.countdown-tip p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.countdown-num {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1890ff;
+  margin: 0 4px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.action-buttons .el-button {
+  flex: 1;
+}
+
+/* PC端优化 */
+@media (min-width: 768px) {
+  .success-container {
+    padding: 80px 60px;
+  }
+  
+  .success-title {
+    font-size: 32px;
+  }
+}
